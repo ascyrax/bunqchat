@@ -1,60 +1,58 @@
-
 /* Landing Page */
 
 .landing {
-    height: 100vh;
-    width: 100vw;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* header */
+
+.landing .header {
+  height: 25vh;
+  padding-top: 5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.landing .logo {
+  height: 6em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.landing .logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.landing .logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
   }
-  
-  /* header */
-  
-  .header {
-    height: 25vh;
-    padding-top: 5rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+  to {
+    transform: rotate(360deg);
   }
-  
-  .logo {
-    height: 6em;
-    will-change: filter;
-    transition: filter 300ms;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .spin {
+    animation: logo-spin infinite 20s linear;
   }
-  .logo:hover {
-    filter: drop-shadow(0 0 2em #646cffaa);
-  }
-  .logo.react:hover {
-    filter: drop-shadow(0 0 2em #61dafbaa);
-  }
-  
-  @keyframes logo-spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-  
-  @media (prefers-reduced-motion: no-preference) {
-    .spin {
-      animation: logo-spin infinite 20s linear;
-    }
-  }
-  
-  /* body */
-  
-  .card {
-    height: 50vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .card > * {
-    margin-top: 1rem;
-  }
-  
+}
+
+/* body */
+
+.landing .card {
+  height: 50vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.landing .card > * {
+  margin-top: 1rem;
+}

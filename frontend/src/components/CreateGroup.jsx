@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import "../styles/CreateGroup.css";
+import { useNavigate } from "react-router-dom";
 
-export default function CreateGroup() {
+export default function CreateGroup({ setCurrentGroup }) {
   const [groupAlreadyExists, setGroupAlreadyExists] = useState(true);
   const [value, setValue] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     let timeoutId = setTimeout(handleDebouncedInput, 1000);
@@ -13,7 +15,6 @@ export default function CreateGroup() {
 
   const handleDebouncedInput = () => {
     if (value.trim() == "") return;
-    console.log(value);
     // send this value to backend to check if such a group exists
     // receive the response from the server
     let result = false; // or false
@@ -31,6 +32,8 @@ export default function CreateGroup() {
 
     // if group created successfully, take the user to that group
     // http://localhost:5173/groups/groupId
+    setCurrentGroup(value);
+    navigate(`/groups/${value}`);
 
     // else show an error message and say to retry
   };

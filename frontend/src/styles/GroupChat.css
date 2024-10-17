@@ -1,0 +1,97 @@
+.groupChat {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.groupChat .header {
+  width: 80vw;
+  height: 10vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+
+  background-color: #1f2d32;
+  padding: 0 1rem;
+  margin-top: 1rem;
+  border-radius: 5px;
+}
+
+.groupChat .header > h2,
+h3 {
+  margin: 0;
+}
+
+.groupChat .body {
+  width: 80vw;
+  height: 80vh;
+  border: 1px solid black;
+  border-radius: 5px;
+  background-color: #0a151a;
+}
+
+.groupChat .body ul{
+  padding: 0 2rem;
+}
+
+.groupChat .messageBlock {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  width: 60vw;
+  background-color: #1f2d32;
+  color: #c4cace;
+
+  margin-top: 1rem;
+  border-radius: 5px;
+}
+
+.groupChat .messageBlock.self{
+  margin-left: auto;
+  background-color: #015c4b;
+}
+
+.groupChat .messageBlock > span {
+  padding: 0.5rem;
+  border-radius: 5px;
+}
+
+.groupChat .messageBlock > span.sender {
+  /* background-color: black; */
+}
+
+.groupChat .messageBlock > span.content {
+  padding-top: 0;
+  /* background-color: #00a884; */
+}
+
+.groupChat .messageBlock > span.timestamp {
+  margin-left: auto;
+}
+
+.groupChat .footer {
+  width: 80vw;
+  height: 10vh;
+
+  background-color: #1f2d32;
+  padding: 0 1rem;
+  margin-bottom: 1rem;
+  border-radius: 5px;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.groupChat .footer .input {
+  background-color: transparent;
+  width: 100%;
+  border-radius: 5px;
+  padding: 1rem;
+  margin-right: 1rem;
+}

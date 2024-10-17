@@ -38,11 +38,11 @@
 .joinGroup > .list > ul > li:hover {
 }
 
-li {
+.joinGroup li {
   transition: 0.1s ease-out;
 }
 
-li:hover {
+.joinGroup li:hover {
   background-color: #cff; /* light blue */
   color: #333; /* dark text */
   transform: translateY(-2px); /* lift up */

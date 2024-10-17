@@ -24,15 +24,15 @@
   color: greenyellow;
 }
 
-.btn-create.success {
+.createGroup .btn-create.success {
   background-color: greenyellow;
   color: black;
 }
 
-.btn-create.error {
+.createGroup .btn-create.error {
   background-color: red;
   color: black;
-  cursor:not-allowed;
+  cursor: not-allowed;
   pointer-events: none;
   opacity: 0.75;
 }
