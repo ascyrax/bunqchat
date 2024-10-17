@@ -1,4 +1,3 @@
-import "./styles/App.css";
 import JoinGroup from "./components/JoinGroup";
 import CreateGroup from "./components/CreateGroup";
 import { useState } from "react";

@@ -1,5 +1,6 @@
 import React from "react";
 import reactLogo from "/bunq.svg";
+import "../styles/Landing.css"
 
 export default function Landing({ handleGroupCreate, handleGroupJoin }) {
   return (
