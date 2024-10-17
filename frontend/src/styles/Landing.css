@@ -54,7 +54,7 @@
     align-items: center;
   }
   
-  .card > button {
+  .card > * {
     margin-top: 1rem;
   }
   

@@ -1,6 +1,7 @@
 import React from "react";
 import reactLogo from "/bunq.svg";
-import "../styles/Landing.css"
+import "../styles/Landing.css";
+import { NavLink } from "react-router-dom";
 
 export default function Landing({ handleGroupCreate, handleGroupJoin }) {
   return (
@@ -12,8 +13,12 @@ export default function Landing({ handleGroupCreate, handleGroupJoin }) {
         <h1>bunqchat</h1>
       </div>
       <div className="card">
-        <button onClick={handleGroupCreate}>Create a Group</button>
-        <button onClick={handleGroupJoin}>Join a Group</button>
+        <NavLink to="/gcreate">
+          <button onClick={handleGroupCreate}>Create a Group</button>
+        </NavLink>
+        <NavLink to="gjoin">
+          <button onClick={handleGroupJoin}>Join a Group</button>
+        </NavLink>
       </div>
     </div>
   );
