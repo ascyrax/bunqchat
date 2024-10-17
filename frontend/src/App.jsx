@@ -1,24 +1,36 @@
-import reactLogo from "/bunq.svg";
 import "./styles/App.css";
+import JoinGroup from "./components/JoinGroup";
+import CreateGroup from "./components/CreateGroup";
+import { useState } from "react";
+import Landing from "./components/Landing";
 
 function App() {
-  const handleGroupCreate = () => {};
-  const handleGroupJoin = () => {};
+  const [groupStatus, setGroupStatus] = useState(0);
+  // 0 = neutral, 1 = create, 2 = join
 
-  return (
-    <div className="app">
-      <div className="header">
-        <a href="https://www.bunq.com/" target="_blank">
-          <img src={reactLogo} className="logo spin" alt="React logo" />
-        </a>
-        <h1>bunqchat</h1>
-      </div>
-      <div className="card">
-        <button onClick={handleGroupCreate}>Create a Group</button>
-        <button onClick={handleGroupJoin}>Join a Group</button>
-      </div>
-    </div>
-  );
+  const handleGroupCreate = () => {
+    setGroupStatus(1);
+  };
+  const handleGroupJoin = () => {
+    setGroupStatus(2);
+  };
+
+  switch (groupStatus) {
+    case 0:
+      return <Landing
+        handleGroupCreate={handleGroupCreate}
+        handleGroupJoin={handleGroupJoin}
+      />;
+      break;
+    case 1:
+      return <CreateGroup />;
+      break;
+    case 2:
+      return <JoinGroup />;
+      break;
+    default:
+      <div>Group Status Error</div>;
+  }
 }
 
 export default App;
