@@ -34,10 +34,15 @@ function App() {
         path="gcreate"
         element={<CreateGroup setCurrentGroup={setCurrentGroup} />}
       />
-      <Route path="gjoin" element={<JoinGroup />} />
+      <Route
+        path="gjoin"
+        element={<JoinGroup setCurrentGroup={setCurrentGroup} />}
+      />
       <Route
         path="groups/*"
-        element={<GroupChat currentGroup={currentGroup} currentUser={currentUser} />}
+        element={
+          <GroupChat currentGroup={currentGroup} currentUser={currentUser} />
+        }
       />
     </Routes>
   );

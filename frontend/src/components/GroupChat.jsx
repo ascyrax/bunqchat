@@ -14,11 +14,6 @@ export default function GroupChat({ currentGroup, currentUser }) {
     "shashank1",
     "ganja1",
     "suraj1",
-    "das2",
-    "modi2",
-    "shashank2",
-    "ganja2",
-    "suraj2",
   ];
   // todo. remove this with actual data sent by server :)
   const [messages, setMessages] = useState([
@@ -28,26 +23,26 @@ export default function GroupChat({ currentGroup, currentUser }) {
     { sender: "suraj", content: "same chal rha mera to", timestamp: "" },
     { sender: "shashank", content: "mera to whi wfh chal rha", timestamp: "" },
     { sender: "ganja", content: "hum end sem ke liye padh rhe", timestamp: "" },
-    { sender: "suraj1", content: "yo niggas", timestamp: "" },
-    { sender: "das1", content: "yo yo", timestamp: "" },
-    { sender: "modi1", content: "kidhar hai sab aaj kal", timestamp: "" },
-    { sender: "suraj1", content: "same chal rha mera to", timestamp: "" },
-    { sender: "shashank1", content: "mera to whi wfh chal rha", timestamp: "" },
-    {
-      sender: "ganja1",
-      content: "hum end sem ke liye padh rhe",
-      timestamp: "",
-    },
-    { sender: "suraj2", content: "yo niggas", timestamp: "" },
-    { sender: "das2", content: "yo yo", timestamp: "" },
-    { sender: "modi2", content: "kidhar hai sab aaj kal", timestamp: "" },
-    { sender: "suraj2", content: "same chal rha mera to", timestamp: "" },
-    { sender: "shashank2", content: "mera to whi wfh chal rha", timestamp: "" },
-    {
-      sender: "ganja2",
-      content: "hum end sem ke liye padh rhe",
-      timestamp: "",
-    },
+    // { sender: "suraj1", content: "yo niggas", timestamp: "" },
+    // { sender: "das1", content: "yo yo", timestamp: "" },
+    // { sender: "modi1", content: "kidhar hai sab aaj kal", timestamp: "" },
+    // { sender: "suraj1", content: "same chal rha mera to", timestamp: "" },
+    // { sender: "shashank1", content: "mera to whi wfh chal rha", timestamp: "" },
+    // {
+    //   sender: "ganja1",
+    //   content: "hum end sem ke liye padh rhe",
+    //   timestamp: "",
+    // },
+    // { sender: "suraj2", content: "yo niggas", timestamp: "" },
+    // { sender: "das2", content: "yo yo", timestamp: "" },
+    // { sender: "modi2", content: "kidhar hai sab aaj kal", timestamp: "" },
+    // { sender: "suraj2", content: "same chal rha mera to", timestamp: "" },
+    // { sender: "shashank2", content: "mera to whi wfh chal rha", timestamp: "" },
+    // {
+    //   sender: "ganja2",
+    //   content: "hum end sem ke liye padh rhe",
+    //   timestamp: "",
+    // },
   ]);
   // todo. same as above
 
