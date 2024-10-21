@@ -39,6 +39,7 @@ function chatRoutes($app, $pdo)
     });
 
     // Message routes
+    // send a message
     $app->post('/messages', function ($request, $response) use ($MessageController) {
         return $MessageController->sendMessage($request, $response);
     });
