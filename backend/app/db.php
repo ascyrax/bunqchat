@@ -27,18 +27,46 @@ function createDatabase()
 function createTables($pdo)
 {
     // Create tables if they do not exist
-    $pdo->exec("CREATE TABLE IF NOT EXISTS chat_groups (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    group_name TEXT NOT NULL,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP
-)");
+    $pdo->exec(
+        "CREATE TABLE IF NOT EXISTS groups (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        group_name TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )"
+    );
 
-    $pdo->exec("CREATE TABLE IF NOT EXISTS messages (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    group_id INTEGER,
-    username TEXT NOT NULL,
-    message TEXT NOT NULL,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (group_id) REFERENCES chat_groups (id)
-)");
+    $pdo->exec(
+        "CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL, -- Store hashed passwords
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )"
+    );
+
+    $pdo->exec(
+        "CREATE TABLE IF NOT EXISTS messages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        group_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        message TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )"
+    );
+
+    $pdo->exec(
+        "CREATE TABLE IF NOT EXISTS group_members (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        group_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        UNIQUE(group_id, user_id) -- Prevent duplicate entries for the same user in the same group
+        )"
+    );
 }

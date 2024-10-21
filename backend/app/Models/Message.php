@@ -9,10 +9,10 @@ class Message {
         $this->pdo = $pdo;
     }
 
-    public function sendMessage($groupId, $username, $message) {
-        $stmt = $this->pdo->prepare('INSERT INTO messages (group_id, username, message) VALUES (:group_id, :username, :message)');
+    public function sendMessage($groupId, $userId, $message) {
+        $stmt = $this->pdo->prepare('INSERT INTO messages (group_id, userId, message) VALUES (:group_id, :userId, :message)');
         $stmt->bindParam(':group_id', $groupId);
-        $stmt->bindParam(':username', $username);
+        $stmt->bindParam(':userId', $userId);
         $stmt->bindParam(':message', $message);
         return $stmt->execute();
     }

@@ -11,6 +11,11 @@ use Psr\Http\Server\MiddlewareInterface;
 
 class JsonBodyParserMiddleware implements MiddlewareInterface
 {
+    private $propName;
+    public function __construct($propName)
+    {
+        $this->propName = $propName;
+    }
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $parsedBody = $request->getParsedBody();
@@ -33,18 +38,18 @@ class JsonBodyParserMiddleware implements MiddlewareInterface
             error_log('Parsed body: ' . var_export($parsedBody, true));
         }
 
-        $groupName = $parsedBody['group_name'] ?? null;
+        $groupName = $parsedBody[$this->propName] ?? null;
 
         if (is_null($groupName)) {
             $errorResponse = [
                 'success' => false,
-                'message' => 'group_name missing.'
+                'message' => $this->propName . 'missing.'
             ];
         } else if ($groupName) {
-            $request = $request->withAttribute('group_name', $groupName);
+            $request = $request->withAttribute($this->propName, $groupName);
         }
         error_log(var_export($groupName, true));
-        
+
         $response = $handler->handle($request);
 
         if (!empty($errorResponse)) {

@@ -1,18 +1,18 @@
 <?php
 
-// app/Controllers/ChatGroupController.php
+// app/Controllers/GroupController.php
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-require_once __DIR__ . '/../Models/ChatGroup.php';
+require_once __DIR__ . '/../Models/Group.php';
 
-class ChatGroupController
+class GroupController
 {
-    private $chatGroupModel;
+    private $GroupModel;
 
     public function __construct($pdo)
     {
-        $this->chatGroupModel = new ChatGroup($pdo);
+        $this->GroupModel = new Group($pdo);
     }
 
     public function createGroup(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
@@ -22,7 +22,7 @@ class ChatGroupController
         $groupName = $request->getAttribute('group_name');
         error_log(var_export($groupName, true));
 
-        if ($this->chatGroupModel->createGroup($groupName)) {
+        if ($this->GroupModel->createGroup($groupName)) {
             error_log("if");
             $response
                 ->withStatus(201)
@@ -42,7 +42,7 @@ class ChatGroupController
 
     public function getAllGroups($request, $response)
     {
-        $groups = $this->chatGroupModel->getAllGroups();
+        $groups = $this->GroupModel->getAllGroups();
         $response->withHeader('Content-Type', 'application/json')
             ->getBody()->write(var_export($groups, true));
         return $response;

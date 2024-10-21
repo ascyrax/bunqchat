@@ -1,7 +1,7 @@
 <?php
-// app/Models/ChatGroup.php
+// app/Models/Group.php
 
-class ChatGroup
+class Group
 {
     private $pdo;
 
@@ -12,7 +12,7 @@ class ChatGroup
 
     public function createGroup($groupName)
     {
-        $stmt = $this->pdo->prepare('INSERT INTO chat_groups (group_name) VALUES (:group_name)');
+        $stmt = $this->pdo->prepare('INSERT INTO groups (group_name) VALUES (:group_name)');
         $stmt->bindParam(':group_name', $groupName);
         error_log("createGroup -> ");
         return $stmt->execute();
@@ -20,7 +20,7 @@ class ChatGroup
 
     public function getAllGroups()
     {
-        $stmt = $this->pdo->query('SELECT * FROM chat_groups');
+        $stmt = $this->pdo->query('SELECT * FROM groups');
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
