@@ -14,7 +14,6 @@ class Group
     {
         $stmt = $this->pdo->prepare('INSERT INTO groups (group_name) VALUES (:group_name)');
         $stmt->bindParam(':group_name', $groupName);
-        error_log("createGroup -> ");
         return $stmt->execute();
     }
 
@@ -22,5 +21,16 @@ class Group
     {
         $stmt = $this->pdo->query('SELECT * FROM groups');
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getGroupByName($groupName)
+    {
+        $stmt = $this->pdo->prepare('SELECT * FROM groups WHERE group_name = :group_name');
+        $stmt->bindParam(':group_name', $groupName);
+        $stmt->execute();
+
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result; // This will return null if no group is found
     }
 }

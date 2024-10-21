@@ -47,4 +47,15 @@ class GroupController
             ->getBody()->write(var_export($groups, true));
         return $response;
     }
+
+    public function getGroupId($groupName)
+    {
+        try {
+            $group = $this->GroupModel->getGroupByName($groupName);
+            return $group['id'];
+        } catch (\Exception $e) {
+            error_log("Could not find group: " . $e->getMessage());
+            return throw new Exception("Group could not be found in the database.");
+        }
+    }
 }

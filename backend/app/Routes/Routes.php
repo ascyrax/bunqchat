@@ -29,6 +29,11 @@ function chatRoutes($app, $pdo)
         return $UserController->createUser($request, $response);
     })->add(new JsonBodyParserMiddleware('username'));
 
+    // create new user
+    $app->post('/join', function ($request, $response) use ($UserController) {
+        return $UserController->joinGroup($request, $response);
+    })->add(new JsonBodyParserMiddleware('username'));
+
     $app->get('/groups', function ($request, $response) use ($GroupController) {
         return $GroupController->getAllGroups($request, $response);
     });
