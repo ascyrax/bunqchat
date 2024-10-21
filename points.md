@@ -1,0 +1,1 @@
+The public/ directory contains only files that should be publicly accessible (like index.php). Your actual application code (in src/) is not accessible via the web, which improves security.
