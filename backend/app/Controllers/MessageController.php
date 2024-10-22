@@ -21,14 +21,14 @@ class MessageController
 
     public function sendMessage($request, $response)
     {
-        $body = $request->getParsedBody();
-        $groupName = $body['group_name'] ?? '';
-        $username = $body['username'] ?? '';
-        $message = $body['message'] ?? '';
+        $params = (array)$request->getParsedBody();
+        $groupName = $params['group_name'] ?? '';
+        $username = $params['username'] ?? '';
+        $content = $params['message'] ?? '';
 
-        error_log(var_export($groupName . $username . $message, true));
+        // error_log(var_export($groupName . $username . $content, true));
 
-        if (empty($groupName) || empty($username) || empty($message)) {
+        if (empty($groupName) || empty($username) || empty($content)) {
             $response->withStatus(400)->getBody()->write(var_export(['flag' => 'error', 'message' => 'Group Name, username, and message are required.'], true));
             return $response;
         }
@@ -40,7 +40,7 @@ class MessageController
             return $response;
         }
 
-        if ($this->messageModel->sendMessage($groupId, $userId, $message)) {
+        if ($this->messageModel->sendMessage($groupId, $userId, $content)) {
             $response->withStatus(201)->getBody()->write(var_export(['flag' => 'success', 'message' => 'Message sent successfully.'], true));
         } else {
             $response->withStatus(500)->getBody()->write(var_export(['flag' => 'error', 'message' => 'Failed to send message.'], true));
@@ -64,12 +64,12 @@ class MessageController
     {
         $groupId = $this->GroupController->getGroupId($groupName);
         $userId = $this->UserController->getUserId($username);
-        $stmt = $this->pdo->prepare('SELECT * FROM group_members WHERE group_id = :group_id AND user_id = :user_id');
+
+        $stmt = $this->pdo->prepare('SELECT * FROM group_member WHERE group_id = :group_id AND user_id = :user_id');
         $stmt->bindParam(':group_id', $groupId);
         $stmt->bindParam(':user_id', $userId);
         $stmt->execute();
         $result =  $stmt->fetchAll(PDO::FETCH_ASSOC);
-        error_log('yooooooooooo------------' . var_export($result, true));
         return [$result, $userId, $groupId];
     }
 }

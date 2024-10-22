@@ -17,23 +17,27 @@ class GroupController
 
     public function createGroup(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
+        $params = (array)$request->getParsedBody();
+        $username = $params['username'];
+        $groupName = $params['group_name'];
+
         // middleware handles all the cases where groupName does not exits
         // todo handle in middleware -> similar groupname already exists.
-        $groupName = $request->getAttribute('group_name');
+        // $groupName = $request->getAttribute('group_name');
         error_log(var_export($groupName, true));
 
-        if ($this->GroupModel->createGroup($groupName)) {
+        if ($this->GroupModel->createGroup($username, $groupName)) {
             $response
                 ->withStatus(201)
                 ->withHeader('Content-Type', 'application/json')
                 ->getBody()
-                ->write(var_export(['message' => 'Chat group created successfully.'], true));
+                ->write(var_export(['flag' => 'success', 'message' => 'Chat group created successfully.'], true));
         } else {
             $response
                 ->withStatus(500)
                 ->withHeader('Content-Type', 'application/json')
                 ->getBody()
-                ->write(var_export(['error' => 'Failed to create chat group.'], true));
+                ->write(var_export(['flag' => 'error', 'message' => 'Failed to create chat group.'], true));
         }
         return $response;
     }

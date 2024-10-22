@@ -11,41 +11,59 @@ class User
 
     public function createUser($username, $password)
     {
-        $stmt = $this->pdo->prepare('INSERT INTO users (username, password) VALUES (:username, :password)');
-        $stmt->bindParam(':username', $username);
-        $stmt->bindParam(':password', $password);
-        return $stmt->execute();
+        try {
+            $stmt = $this->pdo->prepare('INSERT INTO users (username, password) VALUES (:username, :password)');
+            $stmt->bindParam(':username', $username);
+            $stmt->bindParam(':password', $password);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("failed to create a new user:" . $e->getMessage());
+            return false;
+        }
     }
 
     public function getUserByName($username)
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM users WHERE username = :username');
-        $stmt->bindParam(':username', $username);
-        $stmt->execute();
+        try {
+            $stmt = $this->pdo->prepare('SELECT * FROM users WHERE username = :username');
+            $stmt->bindParam(':username', $username);
+            $stmt->execute();
 
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        return $result; // This will return null if no group is found
+            return $result; // This will return null if no group is found
+        } catch (PDOException $e) {
+            error_log('failed to get user:' . $e->getMessage());
+            return [];
+        }
     }
 
     public function getUserByToken($token)
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM users WHERE token = :token');
-        $stmt->bindParam(':token', $token);
-        $stmt->execute();
+        try {
+            $stmt = $this->pdo->prepare('SELECT * FROM users WHERE token = :token');
+            $stmt->bindParam(':token', $token);
+            $stmt->execute();
 
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        return $result; // This will return null if no group is found
+            return $result; // This will return null if no group is found
+        } catch (PDOException $e) {
+            error_log('failed to get user:' . $e->getMessage());
+        }
     }
 
     public function updateUser($userId, $token)
     {
-        $stmt = $this->pdo->prepare("UPDATE users SET token = :token WHERE id = :userId");
-        $stmt->bindParam(":userId", $userId);
-        $stmt->bindParam(":token", $token);
-        return $stmt->execute();
-        // $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        // return $result;
+        try {
+            $stmt = $this->pdo->prepare("UPDATE users SET token = :token WHERE id = :userId");
+            $stmt->bindParam(":userId", $userId);
+            $stmt->bindParam(":token", $token);
+            return $stmt->execute();
+            // $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            // return $result;
+        } catch (PDOException $e) {
+            error_log('failed to update user' . $e->getMessage());
+        }
     }
 }

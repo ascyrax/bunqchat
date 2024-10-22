@@ -61,7 +61,7 @@ function createTables($pdo)
     );
 
     $pdo->exec(
-        "CREATE TABLE IF NOT EXISTS group_member (
+        "CREATE TABLE IF NOT EXISTS group_members (
             group_id INTEGER NOT NULL,
             user_id INTEGER NOT NULL,
             joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,

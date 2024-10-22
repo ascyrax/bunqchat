@@ -44,17 +44,18 @@ class UserController
 
     public function joinGroup(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        $username = $request->getAttribute('username');
-        // $password = $request->getAttribute('password');
-        $password = 'pass' . $username . 'word';
-        $groupName = $request->getAttribute('group_name');
-        $groupName = 'group02'; //hardcoding for now
+        $params = (array)$request->getParsedBody();
+        $username = $params['username'];
+        $groupName = $params['group_name'];
+
+        // $username = $request->getAttribute('username');
+        // $groupName = $request->getAttribute('group_name');
+        // $groupName = 'group02'; //hardcoding for now
         // get userId and groupId
         // currently using hardcoded value
         list($userId, $groupId) = $this->getIds($username, $groupName);
 
-
-        // error_log(var_export($username, true));
+        // error_log(var_export($username, true).'-------'.var_export($groupName, true));
 
         if ($this->GroupMemberModel->joinGroup($userId, $groupId)) {
             $response
