@@ -18,9 +18,9 @@ class Message
     {
         // error_log(var_export($groupId, true) . "" . var_export($userId, true) . "" . var_export($message, true));
         try {
-            $stmt = $this->pdo->prepare('INSERT INTO messages (group_id, user_id, content) VALUES (:group_id, :user_id, :content)');
-            $stmt->bindParam(':group_id', $groupId);
-            $stmt->bindParam(':user_id', $userId);
+            $stmt = $this->pdo->prepare('INSERT INTO messages (groupId, userId, content) VALUES (:groupId, :userId, :content)');
+            $stmt->bindParam(':groupId', $groupId);
+            $stmt->bindParam(':userId', $userId);
             $stmt->bindParam(':content', $content);
             return $stmt->execute();
         } catch (PDOException $e) {
@@ -33,8 +33,8 @@ class Message
     {
         try {
             $groupId = $this->GroupController->getGroupId($groupName);
-            $stmt = $this->pdo->prepare('SELECT * FROM messages WHERE group_id = :group_id ORDER BY created_at ASC');
-            $stmt->bindParam(':group_id', $groupId);
+            $stmt = $this->pdo->prepare('SELECT * FROM messages WHERE groupId = :groupId ORDER BY createdAt ASC');
+            $stmt->bindParam(':groupId', $groupId);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {

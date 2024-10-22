@@ -32,8 +32,8 @@ function createTables($pdo)
         username TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL, -- Store hashed passwords
         token TEXT UNIQUE,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
         )"
     );
 
@@ -41,9 +41,9 @@ function createTables($pdo)
         "CREATE TABLE IF NOT EXISTS groups (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL UNIQUE,
-        created_by INTEGER, -- user id who created this group
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        createdBy INTEGER, -- user id who created this group
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
         )"
     );
 
@@ -51,23 +51,23 @@ function createTables($pdo)
     $pdo->exec(
         "CREATE TABLE IF NOT EXISTS messages (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        group_id INTEGER NOT NULL,
-        user_id INTEGER NOT NULL, -- this is the id of the user who sent the messages
+        groupId INTEGER NOT NULL,
+        userId INTEGER NOT NULL, -- this is the id of the user who sent the messages
         content TEXT NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (groupId) REFERENCES groups(id) ON DELETE CASCADE,
+        FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
         )"
     );
 
     $pdo->exec(
-        "CREATE TABLE IF NOT EXISTS group_members (
-            group_id INTEGER NOT NULL,
-            user_id INTEGER NOT NULL,
-            joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (group_id, user_id),
-            FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        "CREATE TABLE IF NOT EXISTS groupMembers (
+            groupId INTEGER NOT NULL,
+            userId INTEGER NOT NULL,
+            joinedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (groupId, userId),
+            FOREIGN KEY (groupId) REFERENCES groups(id) ON DELETE CASCADE,
+            FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
         )"
     );
     

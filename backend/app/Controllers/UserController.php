@@ -46,10 +46,11 @@ class UserController
     {
         $params = (array)$request->getParsedBody();
         $username = $params['username'];
-        $groupName = $params['group_name'];
+        $groupName = $params['groupName'];
+        
 
         // $username = $request->getAttribute('username');
-        // $groupName = $request->getAttribute('group_name');
+        // $groupName = $request->getAttribute('groupName');
         // $groupName = 'group02'; //hardcoding for now
         // get userId and groupId
         // currently using hardcoded value

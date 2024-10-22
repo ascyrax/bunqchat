@@ -23,11 +23,11 @@ class GroupController
     {
         $params = (array)$request->getParsedBody();
         $username = $params['username'];
-        $groupName = $params['group_name'];
+        $groupName = $params['groupName'];
 
         // middleware handles all the cases where groupName does not exits
         // todo handle in middleware -> similar groupname already exists.
-        // $groupName = $request->getAttribute('group_name');
+        // $groupName = $request->getAttribute('groupName');
         error_log(var_export($groupName, true));
 
         if ($this->GroupModel->createGroup($username, $groupName)) {

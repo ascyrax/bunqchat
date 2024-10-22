@@ -13,9 +13,9 @@ class Group
     public function createGroup($username, $groupName)
     {
         try {
-            $stmt = $this->pdo->prepare('INSERT INTO groups (name, created_by) VALUES (:name, :created_by)');
+            $stmt = $this->pdo->prepare('INSERT INTO groups (name, createdBy) VALUES (:name, :createdBy)');
             $stmt->bindParam(':name', $groupName);
-            $stmt->bindParam(':created_by', $username);
+            $stmt->bindParam(':createdBy', $username);
             return $stmt->execute();
         } catch (PDOException $e) {
             error_log("failed to create a new group:" . $e->getMessage());
@@ -37,8 +37,8 @@ class Group
     public function getGroupByName($groupName)
     {
         try {
-            $stmt = $this->pdo->prepare('SELECT * FROM groups WHERE name = :group_name');
-            $stmt->bindParam(':group_name', $groupName);
+            $stmt = $this->pdo->prepare('SELECT * FROM groups WHERE name = :groupName');
+            $stmt->bindParam(':groupName', $groupName);
             $stmt->execute();
 
             $result = $stmt->fetch(PDO::FETCH_ASSOC);

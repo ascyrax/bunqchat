@@ -18,6 +18,9 @@ class AuthMiddleware
     {
         $token = $request->getHeaderLine('Authorization');
 
+        $params = (array)$request->getParsedBody();
+        $username = $params['username'];
+
         if (!$token) {
             $response = new \Slim\Psr7\Response();
             $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'Unauthorized. Missing Token. Login First.']));
@@ -25,15 +28,23 @@ class AuthMiddleware
         }
 
         // $db = Database::getInstance();
-        $user = $this->UserModel->getUserByToken($token);
+        $loggedUser = $this->UserModel->getUserByToken($token);
+        // error_log("^^^^^^^^^^^^^^^^^^^^^".var_export($username, true));
+        // error_log("^^^^^^^^^^^^^^^^^^^^^".var_export($loggedUser, true));
 
-        if (!$user) {
+        if ($loggedUser['username'] != $username) {
+            $response = new \Slim\Psr7\Response();
+            $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'Unauthorized. Login First.']));
+            return $response->withStatus(401)->withHeader('Content-Type', value: 'application/json');
+        }
+
+        if (!$loggedUser) {
             $response = new \Slim\Psr7\Response();
             $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'Invalid Token. Login Again.']));
             return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
         }
 
-        $request = $request->withAttribute('user', $user);
+        $request = $request->withAttribute('loggedUser', $loggedUser);
 
         return $handler->handle($request);
     }

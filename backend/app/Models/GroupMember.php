@@ -13,7 +13,7 @@ class GroupMember
     {
         error_log(var_export($userId, true).'-------'.var_export($groupId, true));
         try {
-            $stmt = $this->pdo->prepare('INSERT INTO group_members (group_id, user_id) VALUES (:groupId, :userId)');
+            $stmt = $this->pdo->prepare('INSERT INTO groupMembers (groupId, userId) VALUES (:groupId, :userId)');
             $stmt->bindParam(':groupId', $groupId);
             $stmt->bindParam(':userId', $userId);
             return $stmt->execute();
@@ -26,7 +26,7 @@ class GroupMember
     public function getAllGroupMembers()
     {
         try {
-            $stmt = $this->pdo->query('SELECT * FROM group_members');
+            $stmt = $this->pdo->query('SELECT * FROM groupMembers');
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log('failed to get users of this group:' . $e->getMessage());
@@ -37,8 +37,8 @@ class GroupMember
     public function getGroupMemberByName($groupName, $username)
     {
         try {
-            $stmt = $this->pdo->prepare('SELECT * FROM group_members WHERE group_name = :groupName AND username = :username');
-            $stmt->bindParam(':group_name', $groupName);
+            $stmt = $this->pdo->prepare('SELECT * FROM groupMembers WHERE groupName = :groupName AND username = :username');
+            $stmt->bindParam(':groupName', $groupName);
             $stmt->bindParam(':username', $username);
             $stmt->execute();
 

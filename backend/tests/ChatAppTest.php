@@ -26,7 +26,7 @@ class ChatAppTest extends TestCase
         // Reset the database
         $this->db->exec('PRAGMA foreign_keys = ON;');
         $this->db->exec('DROP TABLE IF EXISTS messages;');
-        $this->db->exec('DROP TABLE IF EXISTS group_user;');
+        $this->db->exec('DROP TABLE IF EXISTS groupMembers;');
         $this->db->exec('DROP TABLE IF EXISTS groups;');
         $this->db->exec('DROP TABLE IF EXISTS users;');
 
@@ -191,9 +191,9 @@ class ChatAppTest extends TestCase
 
         $body = json_decode((string)$response->getBody(), true);
         $this->assertEquals('Group created', $body['message']);
-        $this->assertArrayHasKey('group_id', $body);
+        $this->assertArrayHasKey('groupId', $body);
 
-        $this->groupId = $body['group_id'];
+        $this->groupId = $body['groupId'];
     }
 
     public function testCreateGroupWithoutName()
@@ -374,8 +374,8 @@ class ChatAppTest extends TestCase
         $groupId = $this->db->lastInsertId();
 
         // Remove user from group
-        $stmt = $this->db->prepare("DELETE FROM group_user WHERE user_id = :user_id AND group_id = :group_id");
-        $stmt->execute([':user_id' => $this->userId, ':group_id' => $groupId]);
+        $stmt = $this->db->prepare("DELETE FROM groupMembers WHERE userId = :userId AND groupId = :groupId");
+        $stmt->execute([':userId' => $this->userId, ':groupId' => $groupId]);
 
         $request = (new ServerRequestFactory())
             ->createServerRequest('POST', '/groups/' . $groupId . '/messages')
@@ -452,9 +452,9 @@ class ChatAppTest extends TestCase
         $stmt->execute([':name' => 'Not Joined Group', ':created_by' => $this->userId]);
         $groupId = $this->db->lastInsertId();
 
-        // Ensure user is not in group_user
-        $stmt = $this->db->prepare("DELETE FROM group_user WHERE user_id = :user_id AND group_id = :group_id");
-        $stmt->execute([':user_id' => $this->userId, ':group_id' => $groupId]);
+        // Ensure user is not in groupMembers
+        $stmt = $this->db->prepare("DELETE FROM groupMembers WHERE userId = :userId AND groupId = :groupId");
+        $stmt->execute([':userId' => $this->userId, ':groupId' => $groupId]);
 
         $request = (new ServerRequestFactory())
             ->createServerRequest('GET', '/groups/' . $groupId . '/messages')

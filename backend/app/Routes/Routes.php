@@ -36,7 +36,7 @@ function chatRoutes($app, $pdo)
         // Chat group routes
         $group->post('/groups', function ($request, $response) use ($GroupController) {
             return $GroupController->createGroup($request, $response);
-        })->add(new JsonBodyParserMiddleware('group_name'));
+        })->add(new JsonBodyParserMiddleware('groupName'));
 
         // create new user
         $group->post('/users', function ($request, $response) use ($UserController) {

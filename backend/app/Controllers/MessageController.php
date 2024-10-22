@@ -22,7 +22,7 @@ class MessageController
     public function sendMessage($request, $response)
     {
         $params = (array)$request->getParsedBody();
-        $groupName = $params['group_name'] ?? '';
+        $groupName = $params['groupName'] ?? '';
         $username = $params['username'] ?? '';
         $content = $params['message'] ?? '';
 
@@ -35,7 +35,7 @@ class MessageController
 
         list($result, $userId, $groupId) = $this->groupContainsUser($groupName, $username);
 
-        if (empty($result)) { // => no such group_members exist
+        if (empty($result)) { // => no such groupMemberss exist
             $response->withStatus(401)->getBody()->write(var_export(['flag' => 'error', 'message' => 'User is not a member of the group'], true));
             return $response;
         }
@@ -50,7 +50,7 @@ class MessageController
 
     public function getMessages($request, $response, $args)
     {
-        $groupId = $args['group_id'];
+        $groupId = $args['groupId'];
         // error_log(var_export($groupId, true));
 
         $messages = $this->messageModel->getMessagesByGroup($groupId);
@@ -65,9 +65,9 @@ class MessageController
         $groupId = $this->GroupController->getGroupId($groupName);
         $userId = $this->UserController->getUserId($username);
 
-        $stmt = $this->pdo->prepare('SELECT * FROM group_member WHERE group_id = :group_id AND user_id = :user_id');
-        $stmt->bindParam(':group_id', $groupId);
-        $stmt->bindParam(':user_id', $userId);
+        $stmt = $this->pdo->prepare('SELECT * FROM groupMembers WHERE groupId = :groupId AND userId = :userId');
+        $stmt->bindParam(':groupId', $groupId);
+        $stmt->bindParam(':userId', $userId);
         $stmt->execute();
         $result =  $stmt->fetchAll(PDO::FETCH_ASSOC);
         return [$result, $userId, $groupId];
