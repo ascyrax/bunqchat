@@ -21,9 +21,13 @@ class MessageController
 
     public function sendMessage($request, $response)
     {
+        $user = $request->getAttribute('user');
+        $username = $user['username'] ?? '';
+        $userId = $user['userId'] ?? '';
+
         $params = (array)$request->getParsedBody();
         $groupName = $params['groupName'] ?? '';
-        $username = $params['username'] ?? '';
+
         $content = $params['message'] ?? '';
 
         // error_log(var_export($groupName . $username . $content, true));
@@ -33,7 +37,7 @@ class MessageController
             return $response;
         }
 
-        list($result, $userId, $groupId) = $this->groupContainsUser($groupName, $username);
+        list($result, $groupId) = $this->groupContainsUser($groupName, $userId);
 
         if (empty($result)) { // => no such groupMemberss exist
             $response->withStatus(401)->getBody()->write(var_export(['flag' => 'error', 'message' => 'User is not a member of the group'], true));
@@ -60,16 +64,15 @@ class MessageController
         return $response;
     }
 
-    public function groupContainsUser($groupName, $username)
+    public function groupContainsUser($groupName, $userId)
     {
         $groupId = $this->GroupController->getGroupId($groupName);
-        $userId = $this->UserController->getUserId($username);
 
         $stmt = $this->pdo->prepare('SELECT * FROM groupMembers WHERE groupId = :groupId AND userId = :userId');
         $stmt->bindParam(':groupId', $groupId);
         $stmt->bindParam(':userId', $userId);
         $stmt->execute();
         $result =  $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return [$result, $userId, $groupId];
+        return [$result, $groupId];
     }
 }

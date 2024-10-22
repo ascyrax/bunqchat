@@ -17,7 +17,7 @@ function chatRoutes($app, $pdo)
     $MessageController = new MessageController($pdo);
     $UserController = new UserController($pdo);
 
-    // Routes
+    // create new user
     $app->post('/register', function ($request, $response, $args) use ($AuthController) {
         return $AuthController->register($request, $response, $args);
     });
@@ -33,24 +33,23 @@ function chatRoutes($app, $pdo)
             return $response;
         });
 
-        // Chat group routes
+        // create group
         $group->post('/groups', function ($request, $response) use ($GroupController) {
             return $GroupController->createGroup($request, $response);
         })->add(new JsonBodyParserMiddleware('groupName'));
 
-        // create new user
-        $group->post('/users', function ($request, $response) use ($UserController) {
-            return $UserController->createUser($request, $response);
-        })->add(new JsonBodyParserMiddleware('username'));
+        // $group->post('/users', function ($request, $response) use ($UserController) {
+        //     return $UserController->createUser($request, $response);
+        // })->add(new JsonBodyParserMiddleware('username'));
 
-        // create new user
         $group->post('/join', function ($request, $response) use ($UserController) {
             return $UserController->joinGroup($request, $response);
-        })->add(new JsonBodyParserMiddleware('username'));
+        });
 
-        // $group->get('/groups', function ($request, $response) use ($GroupController) {
-        //     return $GroupController->getAllGroups($request, $response);
-        // });
+        // todo
+        $group->get('/groups', function ($request, $response) use ($GroupController) {
+            return $GroupController->getAllGroups($request, $response);
+        });
 
         // Message routes
         // send a message
@@ -58,7 +57,7 @@ function chatRoutes($app, $pdo)
             return $MessageController->sendMessage($request, $response);
         });
 
-        $group->post('/messages/{groupId}', function ($request, $response, $args) use ($MessageController) {
+        $group->get('/messages/{groupId}', function ($request, $response, $args) use ($MessageController) {
             return $MessageController->getMessages($request, $response, $args);
         });
     })->add(new AuthMiddleware($pdo));

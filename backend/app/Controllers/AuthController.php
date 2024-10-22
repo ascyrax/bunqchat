@@ -6,9 +6,14 @@ use Psr\Http\Message\ServerRequestInterface;
 require_once __DIR__ . '/../Models/User.php';
 require_once __DIR__ . '/../Helpers/TokenGenerator.php';
 
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
 class AuthController
 {
     private $UserModel, $tokenGenerator;
+    private $secretKey = 'awesomeANDsecretKEY'; // Replace with a secure key
+
 
     public function __construct($pdo)
     {
@@ -65,7 +70,7 @@ class AuthController
         $params = (array)$request->getParsedBody();
 
         if (empty($params['username']) || empty($params['password'])) {
-            $response->getBody()->write(json_encode(['flag'=>'error', 'message' => 'Username and password are required']));
+            $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'Username and password are required']));
             return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
         }
 
@@ -87,24 +92,36 @@ class AuthController
         }
 
         try {
-            // Generate a new token
-            $token = $this->tokenGenerator->generateToken();
-            $result =  $this->UserModel->updateUser($user['id'], $token);
-            if ($result) {
-                $response
-                    ->withStatus(200)
-                    ->withHeader('Content-Type', 'application/json')
-                    ->getBody()
-                    ->write(var_export(['flag' => 'success', 'message' => 'Login successful.', 'token' => $token], true));
-            } else {
-                $response
-                    ->withStatus(500)
-                    ->withHeader('Content-Type', 'application/json')
-                    ->getBody()
-                    ->write(var_export(['flag' => 'error', 'message' => 'Login failed.'], true));
-            }
+            // Generate JWT
+            $payload = [
+                'iss' => 'your_domain.com',    // Issuer
+                'aud' => 'your_domain.com',    // Audience
+                'iat' => time(),               // Issued at
+                'nbf' => time(),               // Not before
+                'exp' => time() + (60 * 60),   // Expiration time (e.g., 1 hour)
+                'data' => [
+                    'userId' => $user['id'],
+                    'username' => $user['username']
+                ]
+            ];
+
+            $jwt = JWT::encode($payload, $this->secretKey, 'HS256');
+
+            // no need to do this :)
+            // $result =  $this->UserModel->updateUser($user['id'], $token);
+
+            $response
+                ->withStatus(200)
+                ->withHeader('Content-Type', 'application/json')
+                ->getBody()
+                ->write(var_export(['flag' => 'success', 'message' => 'Login successful.', 'token' => $jwt], true));
             return $response;
         } catch (\PDOException $e) {
+            $response
+                ->withStatus(500)
+                ->withHeader('Content-Type', 'application/json')
+                ->getBody()
+                ->write(var_export(['flag' => 'error', 'message' => 'Login failed.'], true));
             throw $e;
         }
     }

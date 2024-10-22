@@ -21,17 +21,20 @@ class GroupController
 
     public function createGroup(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
+        $user = $request->getAttribute('user');
+        $username = $user['username'] ?? '';
+        $userId = $user['userId'] ?? '';
+
         $params = (array)$request->getParsedBody();
-        $username = $params['username'];
-        $groupName = $params['groupName'];
+        $groupName = $params['groupName'] ?? '';
 
         // middleware handles all the cases where groupName does not exits
         // todo handle in middleware -> similar groupname already exists.
         // $groupName = $request->getAttribute('groupName');
         error_log(var_export($groupName, true));
 
-        if ($this->GroupModel->createGroup($username, $groupName)) {
-            list($userId, $groupId) = $this->getIds($username, $groupName);
+        if ($this->GroupModel->createGroup($userId, $groupName)) {
+            $groupId = $this->getGroupId($groupName);
 
             if ($this->GroupMemberModel->joinGroup($userId, $groupId)) {
                 $response
@@ -77,26 +80,6 @@ class GroupController
         } catch (\Exception $e) {
             error_log("Could not find group: " . $e->getMessage());
             return throw new Exception("Group could not be found in the database.");
-        }
-    }
-
-
-    function getIds($username, $groupName)
-    {
-        // this can be redis-cached :)
-        $userId = $this->getUserId($username);
-        $groupId = $this->getGroupId($groupName);
-        return [$userId, $groupId];
-    }
-
-    public function getUserId($groupName)
-    {
-        try {
-            $user = $this->UserModel->getUserByName($groupName);
-            return $user['id'];
-        } catch (\Exception $e) {
-            error_log("Could not find the user: " . $e->getMessage());
-            return throw new Exception("User could not be found in the database.");
         }
     }
 }

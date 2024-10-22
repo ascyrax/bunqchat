@@ -16,7 +16,6 @@ class Message
 
     public function sendMessage($groupId, $userId, $content)
     {
-        // error_log(var_export($groupId, true) . "" . var_export($userId, true) . "" . var_export($message, true));
         try {
             $stmt = $this->pdo->prepare('INSERT INTO messages (groupId, userId, content) VALUES (:groupId, :userId, :content)');
             $stmt->bindParam(':groupId', $groupId);

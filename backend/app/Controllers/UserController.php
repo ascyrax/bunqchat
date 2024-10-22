@@ -19,44 +19,39 @@ class UserController
         $this->GroupController = new GroupController($pdo);
     }
 
-    public function createUser(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
-    {
-        $username = $request->getAttribute('username');
-        // $password = $request->getAttribute('password');
-        $password = 'pass' . $username . 'word';
-        // error_log(var_export($username, true));
+    // public function createUser(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    // {
+    //     $username = $request->getAttribute('username');
+    //     // $password = $request->getAttribute('password');
+    //     $password = 'pass' . $username . 'word';
+    //     // error_log(var_export($username, true));
 
-        if ($this->UserModel->createUser($username, $password)) {
-            $response
-                ->withStatus(201)
-                ->withHeader('Content-Type', 'application/json')
-                ->getBody()
-                ->write(var_export(['message' => 'New user created successfully.'], true));
-        } else {
-            $response
-                ->withStatus(500)
-                ->withHeader('Content-Type', 'application/json')
-                ->getBody()
-                ->write(var_export(['flag' => 'error', 'message' => 'Failed to create a new user.'], true));
-        }
-        return $response;
-    }
+    //     if ($this->UserModel->createUser($username, $password)) {
+    //         $response
+    //             ->withStatus(201)
+    //             ->withHeader('Content-Type', 'application/json')
+    //             ->getBody()
+    //             ->write(var_export(['message' => 'New user created successfully.'], true));
+    //     } else {
+    //         $response
+    //             ->withStatus(500)
+    //             ->withHeader('Content-Type', 'application/json')
+    //             ->getBody()
+    //             ->write(var_export(['flag' => 'error', 'message' => 'Failed to create a new user.'], true));
+    //     }
+    //     return $response;
+    // }
 
     public function joinGroup(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
+        $user = $request->getAttribute('user');
+        $username = $user['username'] ?? '';
+        $userId = $user['userId'] ?? '';
+
         $params = (array)$request->getParsedBody();
-        $username = $params['username'];
-        $groupName = $params['groupName'];
-        
+        $groupName = $params['groupName'] ?? '';
 
-        // $username = $request->getAttribute('username');
-        // $groupName = $request->getAttribute('groupName');
-        // $groupName = 'group02'; //hardcoding for now
-        // get userId and groupId
-        // currently using hardcoded value
-        list($userId, $groupId) = $this->getIds($username, $groupName);
-
-        // error_log(var_export($username, true).'-------'.var_export($groupName, true));
+        $groupId = $this->getGroupId($groupName);
 
         if ($this->GroupMemberModel->joinGroup($userId, $groupId)) {
             $response
@@ -74,22 +69,9 @@ class UserController
         return $response;
     }
 
-    function getIds($username, $groupName)
+    function getGroupId($groupName)
     {
-        // this can be redis-cached :)
-        $userId = $this->getUserId($username);
         $groupId = $this->GroupController->getGroupId($groupName);
-        return [$userId, $groupId];
-    }
-
-    public function getUserId($groupName)
-    {
-        try {
-            $user = $this->UserModel->getUserByName($groupName);
-            return $user['id'];
-        } catch (\Exception $e) {
-            error_log("Could not find the user: " . $e->getMessage());
-            return throw new Exception("User could not be found in the database.");
-        }
+        return $groupId;
     }
 }
