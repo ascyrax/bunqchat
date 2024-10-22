@@ -2,8 +2,6 @@
 
 // app/Middleware/JsonBodyParserMiddleware.php
 
-namespace App\Middleware;
-
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -31,7 +29,7 @@ class JsonBodyParserMiddleware implements MiddlewareInterface
         if ($parsedBody === null) {
             error_log('Parsed body is null. Raw body contents: ' . $rawBody);
             $errorResponse = [
-                'success' => false,
+                'flag' => 'error',
                 'message' => 'Empty request.'
             ];
         } else {
@@ -42,7 +40,7 @@ class JsonBodyParserMiddleware implements MiddlewareInterface
 
         if (is_null($groupName)) {
             $errorResponse = [
-                'success' => false,
+                'flag' => 'error',
                 'message' => $this->propName . 'missing.'
             ];
         } else if ($groupName) {

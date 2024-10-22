@@ -23,14 +23,12 @@ class GroupController
         error_log(var_export($groupName, true));
 
         if ($this->GroupModel->createGroup($groupName)) {
-            error_log("if");
             $response
                 ->withStatus(201)
                 ->withHeader('Content-Type', 'application/json')
                 ->getBody()
                 ->write(var_export(['message' => 'Chat group created successfully.'], true));
         } else {
-            error_log("else");
             $response
                 ->withStatus(500)
                 ->withHeader('Content-Type', 'application/json')

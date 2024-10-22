@@ -29,21 +29,21 @@ class MessageController
         error_log(var_export($groupName . $username . $message, true));
 
         if (empty($groupName) || empty($username) || empty($message)) {
-            $response->withStatus(400)->getBody()->write(var_export(['error' => 'Group Name, username, and message are required.'], true));
+            $response->withStatus(400)->getBody()->write(var_export(['flag' => 'error', 'message' => 'Group Name, username, and message are required.'], true));
             return $response;
         }
 
         list($result, $userId, $groupId) = $this->groupContainsUser($groupName, $username);
 
         if (empty($result)) { // => no such group_members exist
-            $response->withStatus(401)->getBody()->write(var_export(['success' => false, 'message' => 'User is not a member of the group'], true));
+            $response->withStatus(401)->getBody()->write(var_export(['flag' => 'error', 'message' => 'User is not a member of the group'], true));
             return $response;
         }
 
         if ($this->messageModel->sendMessage($groupId, $userId, $message)) {
-            $response->withStatus(201)->getBody()->write(var_export(['success' => true, 'message' => 'Message sent successfully.'], true));
+            $response->withStatus(201)->getBody()->write(var_export(['flag' => 'success', 'message' => 'Message sent successfully.'], true));
         } else {
-            $response->withStatus(500)->getBody()->write(var_export(['success' => false, 'error' => 'Failed to send message.'], true));
+            $response->withStatus(500)->getBody()->write(var_export(['flag' => 'error', 'message' => 'Failed to send message.'], true));
         }
         return $response;
     }

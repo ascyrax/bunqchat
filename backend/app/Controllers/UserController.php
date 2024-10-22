@@ -37,7 +37,7 @@ class UserController
                 ->withStatus(500)
                 ->withHeader('Content-Type', 'application/json')
                 ->getBody()
-                ->write(var_export(['error' => 'Failed to create a new user.'], true));
+                ->write(var_export(['flag' => 'error', 'message' => 'Failed to create a new user.'], true));
         }
         return $response;
     }
@@ -61,13 +61,13 @@ class UserController
                 ->withStatus(201)
                 ->withHeader('Content-Type', 'application/json')
                 ->getBody()
-                ->write(var_export(['success' => true, 'message' => 'User joined the Group successfully.'], true));
+                ->write(var_export(['flag' => 'success', 'message' => 'User joined the Group successfully.'], true));
         } else {
             $response
                 ->withStatus(500)
                 ->withHeader('Content-Type', 'application/json')
                 ->getBody()
-                ->write(var_export(['success' => false, 'error' => 'User failed to join the group.'], true));
+                ->write(var_export(['flag' => 'error', 'message' => 'User failed to join the group.'], true));
         }
         return $response;
     }

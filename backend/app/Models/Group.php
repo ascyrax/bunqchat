@@ -12,7 +12,7 @@ class Group
 
     public function createGroup($groupName)
     {
-        $stmt = $this->pdo->prepare('INSERT INTO groups (group_name) VALUES (:group_name)');
+        $stmt = $this->pdo->prepare('INSERT INTO groups (name) VALUES (:group_name)');
         $stmt->bindParam(':group_name', $groupName);
         return $stmt->execute();
     }
@@ -25,7 +25,7 @@ class Group
 
     public function getGroupByName($groupName)
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM groups WHERE group_name = :group_name');
+        $stmt = $this->pdo->prepare('SELECT * FROM groups WHERE name = :group_name');
         $stmt->bindParam(':group_name', $groupName);
         $stmt->execute();
 
