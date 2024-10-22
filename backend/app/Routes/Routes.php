@@ -48,9 +48,9 @@ function chatRoutes($app, $pdo)
             return $UserController->joinGroup($request, $response);
         })->add(new JsonBodyParserMiddleware('username'));
 
-        $group->get('/groups', function ($request, $response) use ($GroupController) {
-            return $GroupController->getAllGroups($request, $response);
-        });
+        // $group->get('/groups', function ($request, $response) use ($GroupController) {
+        //     return $GroupController->getAllGroups($request, $response);
+        // });
 
         // Message routes
         // send a message
@@ -58,7 +58,7 @@ function chatRoutes($app, $pdo)
             return $MessageController->sendMessage($request, $response);
         });
 
-        $group->get('/messages/{group_id}', function ($request, $response, $args) use ($MessageController) {
+        $group->post('/messages/{groupId}', function ($request, $response, $args) use ($MessageController) {
             return $MessageController->getMessages($request, $response, $args);
         });
     })->add(new AuthMiddleware($pdo));

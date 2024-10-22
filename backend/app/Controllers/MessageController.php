@@ -51,7 +51,7 @@ class MessageController
     public function getMessages($request, $response, $args)
     {
         $groupId = $args['groupId'];
-        // error_log(var_export($groupId, true));
+        error_log("********************" . var_export($groupId, true));
 
         $messages = $this->messageModel->getMessagesByGroup($groupId);
         // error_log(var_export($messages, true));
