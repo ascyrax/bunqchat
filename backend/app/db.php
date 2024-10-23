@@ -1,5 +1,4 @@
 <?php
-// app/db.php
 
 function createDatabase()
 {
@@ -31,7 +30,6 @@ function createTables($pdo)
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL, -- Store hashed passwords
-        token TEXT UNIQUE,
         createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
         updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
         )"

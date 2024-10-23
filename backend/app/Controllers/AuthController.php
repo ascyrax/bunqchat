@@ -2,23 +2,18 @@
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Firebase\JWT\JWT;
 
 require_once __DIR__ . '/../Models/User.php';
-require_once __DIR__ . '/../Helpers/TokenGenerator.php';
-
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
 
 class AuthController
 {
-    private $UserModel, $tokenGenerator;
-    private $secretKey = 'awesomeANDsecretKEY'; // Replace with a secure key
+    private $UserModel, $secretKey = 'awesomeANDsecretKEY';
 
 
     public function __construct($pdo)
     {
         $this->UserModel = new User($pdo);
-        $this->tokenGenerator = new TokenGenerator($pdo);
     }
 
     // Register a new user
@@ -94,8 +89,8 @@ class AuthController
         try {
             // Generate JWT
             $payload = [
-                'iss' => 'your_domain.com',    // Issuer
-                'aud' => 'your_domain.com',    // Audience
+                'iss' => 'bunqchat.com',    // Issuer
+                'aud' => 'audience.com',    // Audience
                 'iat' => time(),               // Issued at
                 'nbf' => time(),               // Not before
                 'exp' => time() + (60 * 60),   // Expiration time (e.g., 1 hour)

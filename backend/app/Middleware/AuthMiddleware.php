@@ -2,27 +2,15 @@
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-
-require_once __DIR__ . "/../Models/User.php";
-
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
 class AuthMiddleware
 {
-    private $UserModel;
     private $secretKey = 'awesomeANDsecretKEY'; // Replace with a secure key
-
-
-
-    public function __construct($pdo)
-    {
-        $this->UserModel = new User($pdo);
-    }
 
     public function __invoke(Request $request, $handler): Response
     {
-        // $token = $request->getHeaderLine('Authorization');
         $authHeader = $request->getHeader('Authorization');
 
         if (!$authHeader) {
@@ -52,7 +40,6 @@ class AuthMiddleware
             // check if the logged in user is same as the one mentioned in the json data
             $params = (array)$request->getParsedBody();
             $paramUsername = $params['username'] ?? '';
-            // error_log("&&&&&&&&&&&&&&&&&&&&&&" . var_export($paramUsername, true) . "******" . var_export($decoded->data->username, true));
             // if its empty => no username value has been sent with the http => :)
             if ($paramUsername && $paramUsername != $decoded->data->username) {
                 // security alert 
@@ -72,23 +59,5 @@ class AuthMiddleware
             $response->getBody()->write(json_encode(['error' => 'Unauthorized']));
             return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
         }
-
-        // $loggedUser = $this->UserModel->getUserByToken($token);
-
-        // if ($loggedUser['username'] != $username) {
-        //     $response = new \Slim\Psr7\Response();
-        //     $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'Unauthorized. Login First.']));
-        //     return $response->withStatus(401)->withHeader('Content-Type', value: 'application/json');
-        // }
-
-        // if (!$loggedUser) {
-        //     $response = new \Slim\Psr7\Response();
-        //     $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'Invalid Token. Login Again.']));
-        //     return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
-        // }
-
-        // $request = $request->withAttribute('loggedUser', $loggedUser);
-
-        // return $handler->handle($request);
     }
 }

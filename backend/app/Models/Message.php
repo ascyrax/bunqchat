@@ -1,17 +1,13 @@
 <?php
 
-// app/Models/Message.php
-require_once __DIR__ . "/../Controllers/GroupController.php";
 
 class Message
 {
     private $pdo;
-    private $GroupController;
 
     public function __construct($pdo)
     {
         $this->pdo = $pdo;
-        $this->GroupController = new GroupController($pdo);
     }
 
     public function sendMessage($groupId, $userId, $content)
@@ -28,10 +24,9 @@ class Message
         }
     }
 
-    public function getMessagesByGroup($groupName)
+    public function getMessagesByGroup($groupId)
     {
         try {
-            $groupId = $this->GroupController->getGroupId($groupName);
             $stmt = $this->pdo->prepare('SELECT * FROM messages WHERE groupId = :groupId ORDER BY createdAt ASC');
             $stmt->bindParam(':groupId', $groupId);
             $stmt->execute();

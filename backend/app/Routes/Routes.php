@@ -1,5 +1,4 @@
 <?php
-// app/Routes/chatRoutes.php
 
 require_once __DIR__ . '/../Controllers/GroupController.php';
 require_once __DIR__ . '/../Controllers/MessageController.php';
@@ -21,6 +20,7 @@ function chatRoutes($app, $pdo)
     $app->post('/register', function ($request, $response, $args) use ($AuthController) {
         return $AuthController->register($request, $response, $args);
     });
+
     $app->post('/login', function ($request, $response, $args) use ($AuthController) {
         return $AuthController->login($request, $response, $args);
     });
@@ -33,14 +33,10 @@ function chatRoutes($app, $pdo)
             return $response;
         });
 
-        // create group
+        // groups
         $group->post('/groups', function ($request, $response) use ($GroupController) {
             return $GroupController->createGroup($request, $response);
         })->add(new JsonBodyParserMiddleware('groupName'));
-
-        // $group->post('/users', function ($request, $response) use ($UserController) {
-        //     return $UserController->createUser($request, $response);
-        // })->add(new JsonBodyParserMiddleware('username'));
 
         $group->post('/join', function ($request, $response) use ($UserController) {
             return $UserController->joinGroup($request, $response);
@@ -51,16 +47,15 @@ function chatRoutes($app, $pdo)
             return $GroupController->getAllGroups($request, $response);
         });
 
-        // Message routes
-        // send a message
+        // Messages
         $group->post('/messages', function ($request, $response) use ($MessageController) {
             return $MessageController->sendMessage($request, $response);
         });
 
-        $group->get('/messages/{groupId}', function ($request, $response, $args) use ($MessageController) {
+        $group->get('/messages/{groupName}', function ($request, $response, $args) use ($MessageController) {
             return $MessageController->getMessages($request, $response, $args);
         });
-    })->add(new AuthMiddleware($pdo));
+    })->add(new AuthMiddleware());
 
     $app->addBodyParsingMiddleware();
 
