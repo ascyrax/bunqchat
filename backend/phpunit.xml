@@ -1,10 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit bootstrap="tests/bootstrap.php">
+<phpunit
+    bootstrap="app/tests/bootstrap.php"
+    colors="true"
+    verbose="true"
+>
     <testsuites>
-        <testsuite name="Application Test Suite">
-            <directory>./tests</directory>
+        <testsuite name="ChatApp Test Suite">
+            <directory>./app/tests</directory>
         </testsuite>
     </testsuites>
-</phpunit>
 
-<!-- composer require --dev phpunit/phpunit ^9.5 -->
+    <coverage>
+        <include>
+            <directory suffix=".php">./app</directory>
+        </include>
+    </coverage>
+
+    <!-- Optional: Set environment variables -->
+    <php>
+        <env name="ENVIRONMENT" value="testing" />
+    </php>
+</phpunit>

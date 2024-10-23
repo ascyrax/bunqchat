@@ -1,5 +1,7 @@
 <?php
 
+// /app/public/index.php
+
 use Slim\Factory\AppFactory;
 
 require __DIR__ . '/../vendor/autoload.php';

@@ -29,23 +29,24 @@ class MessageController
         // error_log(var_export($groupName . $username . $content, true));
 
         if (empty($groupName) || empty($username) || empty($content)) {
-            $response->withStatus(400)->getBody()->write(var_export(['flag' => 'error', 'message' => 'Group Name, username, and message are required.'], true));
-            return $response;
+            $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'Group Name, username, and message are required.']));
+            return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
         }
 
         list($result, $groupId) = $this->groupContainsUser($groupName, $userId);
 
         if (empty($result)) { // => no such groupMemberss exist
-            $response->withStatus(401)->getBody()->write(var_export(['flag' => 'error', 'message' => 'User is not a member of the group'], true));
-            return $response;
+            $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'User is not a member of the group']));
+            return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
         }
 
         if ($this->MessageModel->sendMessage($groupId, $userId, $content)) {
-            $response->withStatus(201)->getBody()->write(var_export(['flag' => 'success', 'message' => 'Message sent successfully.'], true));
+            $response->getBody()->write(json_encode(['flag' => 'success', 'message' => 'Message sent successfully.']));
+            return $response->withStatus(201)->withHeader('Content-Type', 'application/json');
         } else {
-            $response->withStatus(500)->getBody()->write(var_export(['flag' => 'error', 'message' => 'Failed to send message.'], true));
+            $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'Failed to send message.']));
+            return $response->withStatus(500)->withHeader('Content-Type', 'application/json');
         }
-        return $response;
     }
 
     public function getMessages($request, $response, $args)
@@ -55,15 +56,17 @@ class MessageController
             $groupId = $this->getGroupId($groupName);
             if ($groupId) {
                 $messages = $this->MessageModel->getMessagesByGroup($groupId);
-                $response->withStatus(200)->getBody()->write(var_export(['flag' => 'success', 'message' => $messages], true));
+                $response->getBody()->write(json_encode(['flag' => 'success', 'message' => $messages]));
+                return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
             } else {
-                $response->withStatus(404)->getBody()->write(var_export(['flag' => 'error', 'message' => 'invalid group'], true));
+                $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'invalid group']));
+                return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
             }
         } catch (\Exception $e) {
             error_log('error: could not get the group messages: ' . $e->getMessage());
-            $response->withStatus(500)->getBody()->write(var_export(['flag' => 'error', 'message' => 'error retrieving messages'],   true));
+            $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'error retrieving messages'],));
+            return $response->withStatus(500)->withHeader('Content-Type', 'application/json');
         }
-        return $response;
     }
 
 

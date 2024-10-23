@@ -55,7 +55,7 @@ class JsonBodyParserMiddleware implements MiddlewareInterface
                 ->withStatus(400) // 400 => bad request
                 ->withHeader('Content-Type', 'application/json')
                 ->getBody()
-                ->write(var_export($errorResponse, true));
+                ->write(json_encode($errorResponse));
             return $response;
         }
         return $response;

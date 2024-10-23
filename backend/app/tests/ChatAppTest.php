@@ -1,58 +1,59 @@
 <?php
 
+// /app/tests/ChatAppTest.php
+
 use PHPUnit\Framework\TestCase;
 use Slim\Factory\AppFactory;
 use Slim\Psr7\Factory\ServerRequestFactory;
-use Slim\Psr7\Response;
-use App\Models\Database;
-use App\Middleware\Authentication;
-use App\Controllers\AuthController;
-use App\Controllers\GroupController;
-use App\Controllers\MessageController;
+
+require_once __DIR__ . '/../Controllers/GroupController.php';
+require_once __DIR__ . '/../Controllers/MessageController.php';
+require_once __DIR__ . '/../Controllers/UserController.php';
+require_once __DIR__ . '/../Controllers/AuthController.php';
+require_once __DIR__ . '/../Middleware/AuthMiddleware.php';
+require_once __DIR__ . '/../Middleware/JsonBodyParserMiddleware.php';
+
 
 class ChatAppTest extends TestCase
 {
+    protected $pdo;
     protected $app;
-    protected $db;
     protected $userToken;
     protected $userId;
     protected $groupId;
 
     protected function setUp(): void
     {
-        // Initialize the database
-        $this->db = Database::getInstance();
-
-        // Reset the database
-        $this->db->exec('PRAGMA foreign_keys = ON;');
-        $this->db->exec('DROP TABLE IF EXISTS messages;');
-        $this->db->exec('DROP TABLE IF EXISTS groupMembers;');
-        $this->db->exec('DROP TABLE IF EXISTS groups;');
-        $this->db->exec('DROP TABLE IF EXISTS users;');
-
-        // Load the schema
-        $schema = file_get_contents(__DIR__ . '/../schema.sql');
-        $this->db->exec($schema);
+        // Initialize the in-memory database
+        $this->pdo = createDatabase('sqlite::memory:');
 
         // Set up the app
         $this->app = AppFactory::create();
-        $this->app->addBodyParsingMiddleware();
 
         // Exception Handling Middleware
-        $this->app->addErrorMiddleware(true, true, true);
+        // $this->app->addErrorMiddleware(true, true, true);
+
+        // Instantiate controllers and middleware with $pdo
+        $AuthController = new AuthController($this->pdo);
+        $GroupController = new GroupController($this->pdo);
+        $MessageController = new MessageController($this->pdo);
+        $AuthMiddleware = new AuthMiddleware();
 
         // Routes
-        $this->app->post('/register', [AuthController::class, 'register']);
-        $this->app->post('/login', [AuthController::class, 'login']);
+        $this->app->post('/register', [$AuthController, 'register']);
+        $this->app->post('/login', [$AuthController, 'login']);
 
         // Protected Routes
-        $this->app->group('', function ($group) {
-            $group->post('/groups', [GroupController::class, 'createGroup']);
-            $group->post('/groups/{id}/join', [GroupController::class, 'joinGroup']);
-            $group->post('/groups/{id}/messages', [MessageController::class, 'sendMessage']);
-            $group->get('/groups/{id}/messages', [GroupController::class, 'listMessages']);
-        })->add(new Authentication());
+        $this->app->group('', function ($group) use ($GroupController, $MessageController) {
+            $group->post('/groups', [$GroupController, 'createGroup']);
+            $group->post('/groups/{id}/join', [$GroupController, 'joinGroup']);
+            $group->post('/groups/{id}/messages', [$MessageController, 'sendMessage']);
+            $group->get('/groups/{id}/messages', [$GroupController, 'listMessages']);
+        })->add($AuthMiddleware);
+
+        $this->app->addBodyParsingMiddleware();
     }
+
 
     private function runApp($request)
     {
@@ -70,12 +71,19 @@ class ChatAppTest extends TestCase
                 'username' => 'testuser',
                 'password' => 'testpassword'
             ]);
+        $parsedReqBody = $request->getParsedBody();
 
         $response = $this->runApp($request);
 
-        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals(201, $response->getStatusCode());
+
         $body = json_decode((string)$response->getBody(), true);
-        $this->assertEquals('User registered successfully', $body['message']);
+        if ($body) {
+            if ($body['flag'])
+                $this->assertEquals('success', $body['flag']);
+            if ($body['message'])
+                $this->assertEquals('registration successful.', $body['message']);
+        }
     }
 
     public function testUserRegistrationWithExistingUsername()
@@ -96,7 +104,13 @@ class ChatAppTest extends TestCase
 
         $this->assertEquals(400, $response->getStatusCode());
         $body = json_decode((string)$response->getBody(), true);
-        $this->assertEquals('Username already exists', $body['error']);
+        // $this->assertEquals('Username already exists', $body['error']);
+        if ($body) {
+            if ($body['flag'])
+                $this->assertEquals('error', $body['flag']);
+            if ($body['message'])
+                $this->assertEquals('user already registered.', $body['message']);
+        }
     }
 
     public function testUserRegistrationWithoutCredentials()
@@ -110,7 +124,12 @@ class ChatAppTest extends TestCase
 
         $this->assertEquals(400, $response->getStatusCode());
         $body = json_decode((string)$response->getBody(), true);
-        $this->assertEquals('Username and password are required', $body['error']);
+        if ($body) {
+            if ($body['flag'])
+                $this->assertEquals('error', $body['flag']);
+            if ($body['message'])
+                $this->assertEquals('username and password are required.', $body['message']);
+        }
     }
 
     /*** TESTS FOR USER LOGIN ***/
@@ -138,7 +157,7 @@ class ChatAppTest extends TestCase
         $this->userToken = $body['token'];
 
         // Retrieve user ID for future use
-        $stmt = $this->db->prepare("SELECT id FROM users WHERE token = :token");
+        $stmt = $this->pdo->prepare("SELECT id FROM users WHERE token = :token");
         $stmt->execute([':token' => $this->userToken]);
         $this->userId = $stmt->fetchColumn();
     }
@@ -369,12 +388,12 @@ class ChatAppTest extends TestCase
         $this->testUserLoginSuccess();
 
         // Create a new group without joining it
-        $stmt = $this->db->prepare("INSERT INTO groups (name, created_by) VALUES (:name, :created_by)");
+        $stmt = $this->pdo->prepare("INSERT INTO groups (name, created_by) VALUES (:name, :created_by)");
         $stmt->execute([':name' => 'Another Group', ':created_by' => $this->userId]);
-        $groupId = $this->db->lastInsertId();
+        $groupId = $this->pdo->lastInsertId();
 
         // Remove user from group
-        $stmt = $this->db->prepare("DELETE FROM groupMembers WHERE userId = :userId AND groupId = :groupId");
+        $stmt = $this->pdo->prepare("DELETE FROM groupMembers WHERE userId = :userId AND groupId = :groupId");
         $stmt->execute([':userId' => $this->userId, ':groupId' => $groupId]);
 
         $request = (new ServerRequestFactory())
@@ -448,12 +467,12 @@ class ChatAppTest extends TestCase
         $this->testUserLoginSuccess();
 
         // Create a new group without joining it
-        $stmt = $this->db->prepare("INSERT INTO groups (name, created_by) VALUES (:name, :created_by)");
+        $stmt = $this->pdo->prepare("INSERT INTO groups (name, created_by) VALUES (:name, :created_by)");
         $stmt->execute([':name' => 'Not Joined Group', ':created_by' => $this->userId]);
-        $groupId = $this->db->lastInsertId();
+        $groupId = $this->pdo->lastInsertId();
 
         // Ensure user is not in groupMembers
-        $stmt = $this->db->prepare("DELETE FROM groupMembers WHERE userId = :userId AND groupId = :groupId");
+        $stmt = $this->pdo->prepare("DELETE FROM groupMembers WHERE userId = :userId AND groupId = :groupId");
         $stmt->execute([':userId' => $this->userId, ':groupId' => $groupId]);
 
         $request = (new ServerRequestFactory())

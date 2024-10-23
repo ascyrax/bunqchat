@@ -1,18 +1,25 @@
 <?php
 
-function createDatabase()
-{
-    $dbFile = __DIR__ . '/../database/database.sqlite';
+// /app/db.php
 
-    // Create the database file if it does not exist
-    if (!file_exists($dbFile)) {
-        touch($dbFile);
+function createDatabase($dsn = null)
+{
+    if ($dsn === null) {
+        $dbFile = __DIR__ . '/../database/database.sqlite';
+
+        // Create the database file if it does not exist
+        if (!file_exists($dbFile)) {
+            touch($dbFile);
+        }
+
+        $dsn = 'sqlite:' . $dbFile;
     }
 
     // Create a new PDO instance
     try {
-        $pdo = new PDO('sqlite:' . $dbFile);
+        $pdo = new PDO($dsn);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo->exec('PRAGMA foreign_keys = ON;');  // Enable foreign keys
     } catch (PDOException $e) {
         error_log("Database connection error: " . $e->getMessage());
         throw new Exception("Unable to connect to the database.");
@@ -68,5 +75,4 @@ function createTables($pdo)
             FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
         )"
     );
-    
 }

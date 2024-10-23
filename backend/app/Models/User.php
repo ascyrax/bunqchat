@@ -15,10 +15,10 @@ class User
             $stmt = $this->pdo->prepare('INSERT INTO users (username, password) VALUES (:username, :password)');
             $stmt->bindParam(':username', $username);
             $stmt->bindParam(':password', $password);
-            return $stmt->execute();
+            return [true, $stmt->execute()];
         } catch (PDOException $e) {
             error_log("failed to create a new user:" . $e->getMessage());
-            return false;
+            return [false, $e];
         }
     }
 

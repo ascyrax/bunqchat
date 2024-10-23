@@ -22,41 +22,33 @@ class AuthController
         $params = (array)$request->getParsedBody();
 
         if (empty($params['username']) || empty($params['password'])) {
-            $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'Username and password are required']));
+            $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'username and password are required.']));
             return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
         }
 
         $username = $params['username'];
         $password = password_hash($params['password'], PASSWORD_BCRYPT);
 
+        list($flag, $e) = $this->UserModel->createUser($username, $password);
 
-
-        try {
-            if ($this->UserModel->createUser($username, $password)) {
-                $response
-                    ->withStatus(201)
-                    ->withHeader('Content-Type', 'application/json')
-                    ->getBody()
-                    ->write(var_export(['flag' => 'success', 'message' => 'New user created successfully.'], true));
-            } else {
-                $response
-                    ->withStatus(500)
-                    ->withHeader('Content-Type', 'application/json')
-                    ->getBody()
-                    ->write(var_export(['flag' => 'error', 'message' => 'Failed to create a new user.'], true));
+        if ($flag) {
+            $response->getBody()
+                ->write(json_encode(['flag' => 'success', 'message' => 'registration successful.']));
+            return $response->withStatus(201)->withHeader('Content-Type', 'application/json');
+        } else {
+            // Check if the error is due to a unique constraint violation
+            if ($e && $e->getCode() == '23000') {
+                $response->getBody()
+                    ->write(json_encode(['flag' => 'error', 'message' => 'user already registered.']));
+                return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
             }
-        } catch (\PDOException $e) {
-            if ($e->getCode() == 23000) { // Unique constraint violation
-                $response
-                    ->withStatus(400)
-                    ->withHeader('Content-Type', 'application/json')
-                    ->getBody()
-                    ->write(var_export(['flag' => 'error', 'message' => 'User already exists.'], true));
-                return $response;
-            }
-            throw $e;
+            // handle other errors
+            $response
+                ->getBody()
+                ->write(json_encode(['flag' => 'error', 'message' => 'Failed to create a new user.']));
+            return $response->withStatus(500)
+                ->withHeader('Content-Type', 'application/json');
         }
-        return $response;
     }
 
     // User login
@@ -76,11 +68,11 @@ class AuthController
             $user = $this->UserModel->getUserByName($username);
             if (!$user || !password_verify($password, $user['password'])) {
                 $response
-                    ->withStatus(401)
-                    ->withHeader('Content-Type', 'application/json')
                     ->getBody()
-                    ->write(var_export(['flag' => 'error', 'message' => 'Invalid username or password.'], true));
-                return $response;
+                    ->write(json_encode(['flag' => 'error', 'message' => 'Invalid username or password.']));
+                return $response
+                    ->withStatus(401)
+                    ->withHeader('Content-Type', 'application/json');
             }
         } catch (\PDOException $e) {
             throw $e;
@@ -102,22 +94,18 @@ class AuthController
 
             $jwt = JWT::encode($payload, $this->secretKey, 'HS256');
 
-            // no need to do this :)
-            // $result =  $this->UserModel->updateUser($user['id'], $token);
-
             $response
-                ->withStatus(200)
-                ->withHeader('Content-Type', 'application/json')
                 ->getBody()
-                ->write(var_export(['flag' => 'success', 'message' => 'Login successful.', 'token' => $jwt], true));
-            return $response;
+                ->write(json_encode(['flag' => 'success', 'message' => 'Login successful.', 'token' => $jwt]));
+            return $response
+                ->withStatus(200)
+                ->withHeader('Content-Type', 'application/json');
         } catch (\PDOException $e) {
             $response
-                ->withStatus(500)
-                ->withHeader('Content-Type', 'application/json')
                 ->getBody()
-                ->write(var_export(['flag' => 'error', 'message' => 'Login failed.'], true));
-            throw $e;
+                ->write(json_encode(['flag' => 'error', 'message' => 'Login failed.'], true));
+            return $response->withStatus(500)
+                ->withHeader('Content-Type', 'application/json');
         }
     }
 }

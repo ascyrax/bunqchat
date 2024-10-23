@@ -31,13 +31,13 @@ class UserController
                     ->withStatus(201)
                     ->withHeader('Content-Type', 'application/json')
                     ->getBody()
-                    ->write(var_export(['flag' => 'success', 'message' => 'User joined the Group successfully.'], true));
+                    ->write(json_encode(['flag' => 'success', 'message' => 'User joined the Group successfully.']));
             } else {
                 $response
                     ->withStatus(500)
                     ->withHeader('Content-Type', 'application/json')
                     ->getBody()
-                    ->write(var_export(['flag' => 'error', 'message' => 'User failed to join the group.'], true));
+                    ->write(json_encode(['flag' => 'error', 'message' => 'User failed to join the group.']));
             }
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -45,7 +45,7 @@ class UserController
                 ->withStatus(404)
                 ->withHeader('Content-Type', 'application/json')
                 ->getBody()
-                ->write(var_export(['flag' => 'error', 'message' => 'Group could not be found in the database.'], true));
+                ->write(json_encode(['flag' => 'error', 'message' => 'Group could not be found in the database.']));
         }
         return $response;
     }

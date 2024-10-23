@@ -10,11 +10,10 @@ require_once __DIR__ . '/../Models/GroupMember.php';
 
 class GroupController
 {
-    private $GroupModel, $UserModel, $GroupMemberModel;
+    private $GroupModel, $GroupMemberModel;
 
     public function __construct($pdo)
     {
-        $this->UserModel = new User($pdo);
         $this->GroupModel = new Group($pdo);
         $this->GroupMemberModel = new GroupMember($pdo);
     }
@@ -38,38 +37,31 @@ class GroupController
 
             if ($this->GroupMemberModel->joinGroup($userId, $groupId)) {
                 $response
-                    ->withStatus(201)
-                    ->withHeader('Content-Type', 'application/json')
                     ->getBody()
-                    ->write(var_export(['flag' => 'success', 'message' => 'User joined the Group successfully.'], true));
+                    ->write(json_encode(['flag' => 'success', 'message' => 'group created + user joined the group successfully.']));
+                return $response->withStatus(201)
+                    ->withHeader('Content-Type', 'application/json');
             } else {
                 $response
-                    ->withStatus(500)
-                    ->withHeader('Content-Type', 'application/json')
                     ->getBody()
-                    ->write(var_export(['flag' => 'error', 'message' => 'User failed to join the group.'], true));
+                    ->write(json_encode(['flag' => 'error', 'message' => 'User failed to join the group.']));
+                return $response->withStatus(500)
+                    ->withHeader('Content-Type', 'application/json');
             }
-            $response
-                ->withStatus(201)
-                ->withHeader('Content-Type', 'application/json')
-                ->getBody()
-                ->write(var_export(['flag' => 'success', 'message' => 'Chat group created successfully.'], true));
         } else {
             $response
-                ->withStatus(500)
-                ->withHeader('Content-Type', 'application/json')
                 ->getBody()
-                ->write(var_export(['flag' => 'error', 'message' => 'Failed to create chat group.'], true));
+                ->write(json_encode(['flag' => 'error', 'message' => 'Failed to create chat group.']));
+            return $response->withStatus(500)
+                ->withHeader('Content-Type', 'application/json');
         }
-        return $response;
     }
 
     public function getAllGroups($request, $response)
     {
         $groups = $this->GroupModel->getAllGroups();
-        $response->withHeader('Content-Type', 'application/json')
-            ->getBody()->write(var_export($groups, true));
-        return $response;
+        $response->getBody()->write(json_encode(['flag' => 'success', 'message' => $groups]));
+        return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
     }
 
     public function getGroupId($groupName)
