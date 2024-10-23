@@ -12,6 +12,8 @@ require_once __DIR__ . '/../Controllers/UserController.php';
 require_once __DIR__ . '/../Controllers/AuthController.php';
 require_once __DIR__ . '/../Middleware/AuthMiddleware.php';
 require_once __DIR__ . '/../Middleware/JsonBodyParserMiddleware.php';
+require_once __DIR__ . '/../db.php';  // Include your database setup
+require_once __DIR__ . '/../Models/Group.php';
 
 
 class ChatAppTest extends TestCase
@@ -21,7 +23,7 @@ class ChatAppTest extends TestCase
     protected $userToken;
     protected $userId;
     protected $groupId;
-
+    protected $GroupModel;
     protected function setUp(): void
     {
         // Initialize the in-memory database
@@ -35,20 +37,23 @@ class ChatAppTest extends TestCase
 
         // Instantiate controllers and middleware with $pdo
         $AuthController = new AuthController($this->pdo);
+        $UserController = new UserController($this->pdo);
         $GroupController = new GroupController($this->pdo);
         $MessageController = new MessageController($this->pdo);
         $AuthMiddleware = new AuthMiddleware();
+
+        $this->GroupModel = new Group($this->pdo);
 
         // Routes
         $this->app->post('/register', [$AuthController, 'register']);
         $this->app->post('/login', [$AuthController, 'login']);
 
         // Protected Routes
-        $this->app->group('', function ($group) use ($GroupController, $MessageController) {
+        $this->app->group('', function ($group) use ($UserController, $GroupController, $MessageController) {
             $group->post('/groups', [$GroupController, 'createGroup']);
-            $group->post('/groups/{id}/join', [$GroupController, 'joinGroup']);
-            $group->post('/groups/{id}/messages', [$MessageController, 'sendMessage']);
-            $group->get('/groups/{id}/messages', [$GroupController, 'listMessages']);
+            $group->post('/join', [$UserController, 'joinGroup']);
+            $group->post('/messages', [$MessageController, 'sendMessage']);
+            $group->get('/messages/{groupName}', [$MessageController, 'getMessages']);
         })->add($AuthMiddleware);
 
         $this->app->addBodyParsingMiddleware();
@@ -78,12 +83,8 @@ class ChatAppTest extends TestCase
         $this->assertEquals(201, $response->getStatusCode());
 
         $body = json_decode((string)$response->getBody(), true);
-        if ($body) {
-            if ($body['flag'])
-                $this->assertEquals('success', $body['flag']);
-            if ($body['message'])
-                $this->assertEquals('registration successful.', $body['message']);
-        }
+        $this->assertEquals('success', $body['flag']);
+        $this->assertEquals('registration successful.', $body['message']);
     }
 
     public function testUserRegistrationWithExistingUsername()
@@ -105,12 +106,8 @@ class ChatAppTest extends TestCase
         $this->assertEquals(400, $response->getStatusCode());
         $body = json_decode((string)$response->getBody(), true);
         // $this->assertEquals('Username already exists', $body['error']);
-        if ($body) {
-            if ($body['flag'])
-                $this->assertEquals('error', $body['flag']);
-            if ($body['message'])
-                $this->assertEquals('user already registered.', $body['message']);
-        }
+        $this->assertEquals('error', $body['flag']);
+        $this->assertEquals('user already registered.', $body['message']);
     }
 
     public function testUserRegistrationWithoutCredentials()
@@ -124,12 +121,8 @@ class ChatAppTest extends TestCase
 
         $this->assertEquals(400, $response->getStatusCode());
         $body = json_decode((string)$response->getBody(), true);
-        if ($body) {
-            if ($body['flag'])
-                $this->assertEquals('error', $body['flag']);
-            if ($body['message'])
-                $this->assertEquals('username and password are required.', $body['message']);
-        }
+        $this->assertEquals('error', $body['flag']);
+        $this->assertEquals('username and password are required.', $body['message']);
     }
 
     /*** TESTS FOR USER LOGIN ***/
@@ -150,18 +143,22 @@ class ChatAppTest extends TestCase
         $response = $this->runApp($request);
 
         $this->assertEquals(200, $response->getStatusCode());
+
         $body = json_decode((string)$response->getBody(), true);
-        $this->assertEquals('Login successful', $body['message']);
+        if ($body) {
+            if ($body['flag'])
+                $this->assertEquals('success', $body['flag']);
+            if ($body['message'])
+                $this->assertEquals('Login successful.', $body['message']);
+        }
         $this->assertArrayHasKey('token', $body);
 
         $this->userToken = $body['token'];
 
-        // Retrieve user ID for future use
-        $stmt = $this->pdo->prepare("SELECT id FROM users WHERE token = :token");
-        $stmt->execute([':token' => $this->userToken]);
-        $this->userId = $stmt->fetchColumn();
+        // Optionally, decode the JWT to get the user ID
+        $payload = $this->decodeJwt($this->userToken);
+        $this->userId = $payload->data->userId;
     }
-
     public function testUserLoginWithInvalidCredentials()
     {
         $request = (new ServerRequestFactory())
@@ -176,7 +173,8 @@ class ChatAppTest extends TestCase
 
         $this->assertEquals(401, $response->getStatusCode());
         $body = json_decode((string)$response->getBody(), true);
-        $this->assertEquals('Invalid username or password', $body['error']);
+        $this->assertEquals('error', $body['flag']);
+        $this->assertEquals('Invalid username or password.', $body['message']);
     }
 
     public function testUserLoginWithoutCredentials()
@@ -190,7 +188,8 @@ class ChatAppTest extends TestCase
 
         $this->assertEquals(400, $response->getStatusCode());
         $body = json_decode((string)$response->getBody(), true);
-        $this->assertEquals('Username and password are required', $body['error']);
+        $this->assertEquals('error', $body['flag']);
+        $this->assertEquals('both username and password are required.', $body['message']);
     }
 
     /*** TESTS FOR GROUP CREATION ***/
@@ -198,21 +197,19 @@ class ChatAppTest extends TestCase
     public function testCreateGroupSuccess()
     {
         $this->testUserLoginSuccess();
-
         $request = (new ServerRequestFactory())
             ->createServerRequest('POST', '/groups')
-            ->withHeader('Authorization', $this->userToken)
-            ->withParsedBody(['name' => 'Test Group']);
+            ->withHeader('Authorization', 'Bearer ' . $this->userToken)
+            ->withParsedBody(['groupName' => 'Test Group']);
 
         $response = $this->runApp($request);
 
-        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals(201, $response->getStatusCode());
+
 
         $body = json_decode((string)$response->getBody(), true);
-        $this->assertEquals('Group created', $body['message']);
-        $this->assertArrayHasKey('groupId', $body);
-
-        $this->groupId = $body['groupId'];
+        $this->assertEquals('success', $body['flag']);
+        $this->assertEquals('group created + user joined the group successfully.', $body['message']);
     }
 
     public function testCreateGroupWithoutName()
@@ -221,7 +218,7 @@ class ChatAppTest extends TestCase
 
         $request = (new ServerRequestFactory())
             ->createServerRequest('POST', '/groups')
-            ->withHeader('Authorization', $this->userToken)
+            ->withHeader('Authorization', 'Bearer ' . $this->userToken)
             ->withParsedBody([]);
 
         $response = $this->runApp($request);
@@ -229,7 +226,8 @@ class ChatAppTest extends TestCase
         $this->assertEquals(400, $response->getStatusCode());
 
         $body = json_decode((string)$response->getBody(), true);
-        $this->assertEquals('Group name is required', $body['error']);
+        $this->assertEquals('error', $body['flag']);
+        $this->assertEquals('Group name is required.', $body['message']);
     }
 
     public function testCreateGroupWithExistingName()
@@ -238,15 +236,16 @@ class ChatAppTest extends TestCase
 
         $request = (new ServerRequestFactory())
             ->createServerRequest('POST', '/groups')
-            ->withHeader('Authorization', $this->userToken)
-            ->withParsedBody(['name' => 'Test Group']);
+            ->withHeader('Authorization', 'Bearer ' . $this->userToken)
+            ->withParsedBody(['groupName' => 'Test Group']);
 
         $response = $this->runApp($request);
 
         $this->assertEquals(400, $response->getStatusCode());
 
         $body = json_decode((string)$response->getBody(), true);
-        $this->assertEquals('Group name already exists', $body['error']);
+        $this->assertEquals('error', $body['flag']);
+        $this->assertEquals('group already exists.', $body['message']);
     }
 
     public function testCreateGroupWithoutAuth()
@@ -260,7 +259,8 @@ class ChatAppTest extends TestCase
         $this->assertEquals(401, $response->getStatusCode());
 
         $body = json_decode((string)$response->getBody(), true);
-        $this->assertEquals('Unauthorized', $body['error']);
+        $this->assertEquals('error', $body['flag']);
+        $this->assertEquals('Unauthorized. Login required.', $body['message']);
     }
 
     /*** TESTS FOR JOINING A GROUP ***/
@@ -270,15 +270,17 @@ class ChatAppTest extends TestCase
         $this->testCreateGroupSuccess();
 
         $request = (new ServerRequestFactory())
-            ->createServerRequest('POST', '/groups/' . $this->groupId . '/join')
-            ->withHeader('Authorization', $this->userToken);
+            ->createServerRequest('POST', '/join')
+            ->withHeader('Authorization', 'Bearer ' . $this->userToken)
+            ->withParsedBody(['groupName' => 'Test Group']);
 
         $response = $this->runApp($request);
 
-        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals(201, $response->getStatusCode());
 
         $body = json_decode((string)$response->getBody(), true);
-        $this->assertEquals('Joined group', $body['message']);
+        $this->assertEquals('success', $body['flag']);
+        $this->assertEquals('User joined the group successfully.', $body['message']);
     }
 
     public function testJoinNonExistentGroup()
@@ -286,15 +288,17 @@ class ChatAppTest extends TestCase
         $this->testUserLoginSuccess();
 
         $request = (new ServerRequestFactory())
-            ->createServerRequest('POST', '/groups/9999/join')
-            ->withHeader('Authorization', $this->userToken);
+            ->createServerRequest('POST', '/join')
+            ->withHeader('Authorization', 'Bearer ' . $this->userToken)
+            ->withParsedBody(['groupName' => '999']);
 
         $response = $this->runApp($request);
 
         $this->assertEquals(404, $response->getStatusCode());
 
         $body = json_decode((string)$response->getBody(), true);
-        $this->assertEquals('Group not found', $body['error']);
+        $this->assertEquals('error', $body['flag']);
+        $this->assertEquals('Group not found.', $body['message']);
     }
 
     public function testJoinGroupWithoutAuth()
@@ -302,14 +306,16 @@ class ChatAppTest extends TestCase
         $this->testCreateGroupSuccess();
 
         $request = (new ServerRequestFactory())
-            ->createServerRequest('POST', '/groups/' . $this->groupId . '/join');
+            ->createServerRequest('POST', '/join')
+            ->withParsedBody(['groupName' => 'Test Group']);
 
         $response = $this->runApp($request);
 
         $this->assertEquals(401, $response->getStatusCode());
 
         $body = json_decode((string)$response->getBody(), true);
-        $this->assertEquals('Unauthorized', $body['error']);
+        $this->assertEquals('error', $body['flag']);
+        $this->assertEquals('Unauthorized. Login required.', $body['message']);
     }
 
     /*** TESTS FOR SENDING MESSAGES ***/
@@ -321,16 +327,17 @@ class ChatAppTest extends TestCase
         // User is already in the group since they created it
 
         $request = (new ServerRequestFactory())
-            ->createServerRequest('POST', '/groups/' . $this->groupId . '/messages')
-            ->withHeader('Authorization', $this->userToken)
-            ->withParsedBody(['content' => 'Hello, World!']);
+            ->createServerRequest('POST', '/messages')
+            ->withHeader('Authorization', 'Bearer ' . $this->userToken)
+            ->withParsedBody(['message' => 'Hello, World!', 'groupName' => 'Test Group']);
 
         $response = $this->runApp($request);
 
-        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals(201, $response->getStatusCode());
 
         $body = json_decode((string)$response->getBody(), true);
-        $this->assertEquals('Message sent', $body['message']);
+        $this->assertEquals('success', $body['flag']);
+        $this->assertEquals('Message sent successfully.', $body['message']);
     }
 
     public function testSendMessageWithoutContent()
@@ -338,8 +345,8 @@ class ChatAppTest extends TestCase
         $this->testCreateGroupSuccess();
 
         $request = (new ServerRequestFactory())
-            ->createServerRequest('POST', '/groups/' . $this->groupId . '/messages')
-            ->withHeader('Authorization', $this->userToken)
+            ->createServerRequest('POST', '/messages')
+            ->withHeader('Authorization', 'Bearer ' . $this->userToken)
             ->withParsedBody([]);
 
         $response = $this->runApp($request);
@@ -347,7 +354,8 @@ class ChatAppTest extends TestCase
         $this->assertEquals(400, $response->getStatusCode());
 
         $body = json_decode((string)$response->getBody(), true);
-        $this->assertEquals('Message content is required', $body['error']);
+        $this->assertEquals('error', $body['flag']);
+        $this->assertEquals('GroupName, username and message are required.', $body['message']);
     }
 
     public function testSendMessageToNonExistentGroup()
@@ -355,16 +363,18 @@ class ChatAppTest extends TestCase
         $this->testUserLoginSuccess();
 
         $request = (new ServerRequestFactory())
-            ->createServerRequest('POST', '/groups/9999/messages')
-            ->withHeader('Authorization', $this->userToken)
-            ->withParsedBody(['content' => 'Hello']);
+            ->createServerRequest('POST', '/messages')
+            ->withHeader('Authorization', 'Bearer ' . $this->userToken)
+            ->withParsedBody(['message' => 'Hello, World!', 'groupName' => '999 Group']);
+
 
         $response = $this->runApp($request);
 
         $this->assertEquals(404, $response->getStatusCode());
 
         $body = json_decode((string)$response->getBody(), true);
-        $this->assertEquals('Group not found', $body['error']);
+        $this->assertEquals('error', $body['flag']);
+        $this->assertEquals('Group not found.', $body['message']);
     }
 
     public function testSendMessageWithoutAuth()
@@ -372,15 +382,17 @@ class ChatAppTest extends TestCase
         $this->testCreateGroupSuccess();
 
         $request = (new ServerRequestFactory())
-            ->createServerRequest('POST', '/groups/' . $this->groupId . '/messages')
-            ->withParsedBody(['content' => 'Hello']);
+            ->createServerRequest('POST', '/messages')
+            ->withParsedBody(['message' => 'Hello, World!', 'groupName' => '999 Group']);
+
 
         $response = $this->runApp($request);
 
         $this->assertEquals(401, $response->getStatusCode());
 
         $body = json_decode((string)$response->getBody(), true);
-        $this->assertEquals('Unauthorized', $body['error']);
+        $this->assertEquals('error', $body['flag']);
+        $this->assertEquals('Unauthorized. Login required.', $body['message']);
     }
 
     public function testSendMessageToGroupNotJoined()
@@ -388,25 +400,26 @@ class ChatAppTest extends TestCase
         $this->testUserLoginSuccess();
 
         // Create a new group without joining it
-        $stmt = $this->pdo->prepare("INSERT INTO groups (name, created_by) VALUES (:name, :created_by)");
-        $stmt->execute([':name' => 'Another Group', ':created_by' => $this->userId]);
+        $stmt = $this->pdo->prepare("INSERT INTO groups (name, createdBy) VALUES (:name, :createdBy)");
+        $stmt->execute([':name' => 'Another Group', ':createdBy' => $this->userId]);
         $groupId = $this->pdo->lastInsertId();
 
-        // Remove user from group
+        // Remove user from groupMembers if added automatically
         $stmt = $this->pdo->prepare("DELETE FROM groupMembers WHERE userId = :userId AND groupId = :groupId");
         $stmt->execute([':userId' => $this->userId, ':groupId' => $groupId]);
 
         $request = (new ServerRequestFactory())
-            ->createServerRequest('POST', '/groups/' . $groupId . '/messages')
-            ->withHeader('Authorization', $this->userToken)
-            ->withParsedBody(['content' => 'Hello']);
+            ->createServerRequest('POST', '/messages')
+            ->withHeader('Authorization', 'Bearer ' . $this->userToken)
+            ->withParsedBody(['message' => 'Hello', 'groupName' => 'Another Group']);
 
         $response = $this->runApp($request);
 
         $this->assertEquals(403, $response->getStatusCode());
 
         $body = json_decode((string)$response->getBody(), true);
-        $this->assertEquals('User not in group', $body['error']);
+        $this->assertEquals('error', $body['flag']);
+        $this->assertEquals('User is not a member of the group.', $body['message']);
     }
 
     /*** TESTS FOR LISTING MESSAGES ***/
@@ -416,19 +429,17 @@ class ChatAppTest extends TestCase
         $this->testSendMessageSuccess();
 
         $request = (new ServerRequestFactory())
-            ->createServerRequest('GET', '/groups/' . $this->groupId . '/messages')
-            ->withHeader('Authorization', $this->userToken);
+            ->createServerRequest('GET',   '/messages' . '/' . 'Test Group')
+            ->withHeader('Authorization', 'Bearer ' . $this->userToken);
 
         $response = $this->runApp($request);
 
         $this->assertEquals(200, $response->getStatusCode());
 
         $body = json_decode((string)$response->getBody(), true);
-
-        $this->assertIsArray($body);
-        $this->assertCount(1, $body);
-        $this->assertEquals('Hello, World!', $body[0]['content']);
-        $this->assertEquals('testuser', $body[0]['user']);
+        $this->assertEquals('success', $body['flag']);
+        $this->assertIsArray($body['message']);
+        $this->assertEquals('Hello, World!', $body['message'][0]['content']);
     }
 
     public function testListMessagesFromNonExistentGroup()
@@ -436,15 +447,16 @@ class ChatAppTest extends TestCase
         $this->testUserLoginSuccess();
 
         $request = (new ServerRequestFactory())
-            ->createServerRequest('GET', '/groups/9999/messages')
-            ->withHeader('Authorization', $this->userToken);
+            ->createServerRequest('GET', '/messages/9999')
+            ->withHeader('Authorization', 'Bearer ' . $this->userToken);
 
         $response = $this->runApp($request);
 
         $this->assertEquals(404, $response->getStatusCode());
 
         $body = json_decode((string)$response->getBody(), true);
-        $this->assertEquals('Group not found', $body['error']);
+        $this->assertEquals('error', $body['flag']);
+        $this->assertEquals('Group not found.', $body['message']);
     }
 
     public function testListMessagesWithoutAuth()
@@ -452,14 +464,15 @@ class ChatAppTest extends TestCase
         $this->testSendMessageSuccess();
 
         $request = (new ServerRequestFactory())
-            ->createServerRequest('GET', '/groups/' . $this->groupId . '/messages');
+            ->createServerRequest('GET', '/messages' . '/Test Group');
 
         $response = $this->runApp($request);
 
         $this->assertEquals(401, $response->getStatusCode());
 
         $body = json_decode((string)$response->getBody(), true);
-        $this->assertEquals('Unauthorized', $body['error']);
+        $this->assertEquals('error', $body['flag']);
+        $this->assertEquals('Unauthorized. Login required.', $body['message']);
     }
 
     public function testListMessagesFromGroupNotJoined()
@@ -467,8 +480,8 @@ class ChatAppTest extends TestCase
         $this->testUserLoginSuccess();
 
         // Create a new group without joining it
-        $stmt = $this->pdo->prepare("INSERT INTO groups (name, created_by) VALUES (:name, :created_by)");
-        $stmt->execute([':name' => 'Not Joined Group', ':created_by' => $this->userId]);
+        $stmt = $this->pdo->prepare("INSERT INTO groups (name, createdBy) VALUES (:name, :createdBy)");
+        $stmt->execute([':name' => 'Not Joined Group', ':createdBy' => $this->userId]);
         $groupId = $this->pdo->lastInsertId();
 
         // Ensure user is not in groupMembers
@@ -476,14 +489,36 @@ class ChatAppTest extends TestCase
         $stmt->execute([':userId' => $this->userId, ':groupId' => $groupId]);
 
         $request = (new ServerRequestFactory())
-            ->createServerRequest('GET', '/groups/' . $groupId . '/messages')
-            ->withHeader('Authorization', $this->userToken);
+            ->createServerRequest('GET', '/messages'.'/Not Joined Group')
+            ->withHeader('Authorization', 'Bearer ' . $this->userToken);
 
         $response = $this->runApp($request);
 
         $this->assertEquals(403, $response->getStatusCode());
 
         $body = json_decode((string)$response->getBody(), true);
-        $this->assertEquals('User not in group', $body['error']);
+        $this->assertEquals('error', $body['flag']);
+        $this->assertEquals('User is not a member of the group.', $body['message']);
+    }
+
+    /*** HELPER METHODS ***/
+
+    // Decode JWT Token
+    private function decodeJwt($token)
+    {
+        $secretKey = 'awesomeANDsecretKEY';  // Replace with your actual secret key
+        $decoded = \Firebase\JWT\JWT::decode($token, new \Firebase\JWT\Key($secretKey, 'HS256'));
+        return $decoded;
+    }
+
+    private function getGroupId($groupName)
+    {
+        try {
+            $group = $this->GroupModel->getGroupByName($groupName);
+            return $group['id'];
+        } catch (\Exception $e) {
+            error_log("Could not find group: " . $e->getMessage());
+            return throw new Exception("Group not found.");
+        }
     }
 }

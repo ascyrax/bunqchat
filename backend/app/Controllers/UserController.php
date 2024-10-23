@@ -28,26 +28,25 @@ class UserController
             $groupId = $this->getGroupId($groupName);
             if ($this->GroupMemberModel->joinGroup($userId, $groupId)) {
                 $response
-                    ->withStatus(201)
-                    ->withHeader('Content-Type', 'application/json')
                     ->getBody()
-                    ->write(json_encode(['flag' => 'success', 'message' => 'User joined the Group successfully.']));
+                    ->write(json_encode(['flag' => 'success', 'message' => 'User joined the group successfully.']));
+                return $response->withStatus(201)
+                    ->withHeader('Content-Type', 'application/json');
             } else {
                 $response
-                    ->withStatus(500)
-                    ->withHeader('Content-Type', 'application/json')
                     ->getBody()
                     ->write(json_encode(['flag' => 'error', 'message' => 'User failed to join the group.']));
+                return $response->withStatus(500)
+                    ->withHeader('Content-Type', 'application/json');
             }
         } catch (Exception $e) {
             error_log($e->getMessage());
             $response
-                ->withStatus(404)
-                ->withHeader('Content-Type', 'application/json')
                 ->getBody()
-                ->write(json_encode(['flag' => 'error', 'message' => 'Group could not be found in the database.']));
+                ->write(json_encode(['flag' => 'error', 'message' => 'Group not found.']));
+            return $response->withStatus(404)
+                ->withHeader('Content-Type', 'application/json');
         }
-        return $response;
     }
 
     function getGroupId($groupName)
@@ -57,7 +56,7 @@ class UserController
             return $group['id'];
         } catch (\Exception $e) {
             error_log("Could not find group: " . $e->getMessage());
-            throw new Exception("Group could not be found in the database.");
+            throw new Exception("Group not found.");
         }
     }
 }

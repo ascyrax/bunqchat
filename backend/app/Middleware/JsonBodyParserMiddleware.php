@@ -17,7 +17,6 @@ class JsonBodyParserMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $parsedBody = $request->getParsedBody();
-        error_log(var_export($parsedBody, true));
         $rawBody = $request->getBody()->getContents();
 
         // Reset the stream for further processing
@@ -46,17 +45,16 @@ class JsonBodyParserMiddleware implements MiddlewareInterface
         } else if ($groupName) {
             $request = $request->withAttribute($this->propName, $groupName);
         }
-        error_log(var_export($groupName, true));
 
         $response = $handler->handle($request);
 
         if (!empty($errorResponse)) {
             $response
-                ->withStatus(400) // 400 => bad request
-                ->withHeader('Content-Type', 'application/json')
                 ->getBody()
                 ->write(json_encode($errorResponse));
-            return $response;
+            return $response
+                ->withStatus(400) // 400 => bad request
+                ->withHeader('Content-Type', 'application/json');
         }
         return $response;
     }

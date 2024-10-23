@@ -10,16 +10,16 @@ class Group
         $this->pdo = $pdo;
     }
 
-    public function createGroup($username, $groupName)
+    public function createGroup($userId, $groupName)
     {
         try {
             $stmt = $this->pdo->prepare('INSERT INTO groups (name, createdBy) VALUES (:name, :createdBy)');
             $stmt->bindParam(':name', $groupName);
-            $stmt->bindParam(':createdBy', $username);
-            return $stmt->execute();
+            $stmt->bindParam(':createdBy', $userId);
+            return [true, $stmt->execute()];
         } catch (PDOException $e) {
             error_log("failed to create a new group:" . $e->getMessage());
-            return false;
+            return [false, $e];
         }
     }
 
@@ -42,8 +42,7 @@ class Group
             $stmt->execute();
 
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            return $result; // This will return null if no group is found
+            return $result; // This will return false if no group is found
         } catch (PDOException $e) {
             error_log("failed to get the group:" . $e->getMessage());
             return [];

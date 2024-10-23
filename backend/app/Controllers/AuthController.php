@@ -57,7 +57,7 @@ class AuthController
         $params = (array)$request->getParsedBody();
 
         if (empty($params['username']) || empty($params['password'])) {
-            $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'Username and password are required']));
+            $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'both username and password are required.']));
             return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
         }
 

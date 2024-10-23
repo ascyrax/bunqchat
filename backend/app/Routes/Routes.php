@@ -26,7 +26,7 @@ function chatRoutes($app, $pdo)
     });
 
     // Protected Routes
-    $app->group('/api', function ($group) use ($GroupController, $UserController, $MessageController) {
+    $app->group('', function ($group) use ($GroupController, $UserController, $MessageController) {
 
         $group->get('/', function ($request, $response) {
             $response->getBody()->write('home page');

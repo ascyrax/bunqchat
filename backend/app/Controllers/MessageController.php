@@ -26,18 +26,27 @@ class MessageController
 
         $content = $params['message'] ?? '';
 
-        // error_log(var_export($groupName . $username . $content, true));
-
         if (empty($groupName) || empty($username) || empty($content)) {
-            $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'Group Name, username, and message are required.']));
+            $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'GroupName, username and message are required.']));
             return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
         }
 
-        list($result, $groupId) = $this->groupContainsUser($groupName, $userId);
+        try {
+            list($result, $groupId) = $this->groupContainsUser($groupName, $userId);
+        } catch (Exception $e) {
+            error_log(var_export($e->getMessage(), true));
+            $response->getBody()->write(json_encode(['flag' => 'error', 'message' => $e->getMessage()]));
+            return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
+        }
 
-        if (empty($result)) { // => no such groupMemberss exist
-            $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'User is not a member of the group']));
-            return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
+        if (empty($result)) { // => no such groupMembers exist
+            if ($groupId == "Group not found.") {
+                $response->getBody()->write(json_encode(['flag' => 'error', 'message' => "Group not found."]));
+                return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
+            } else {
+                $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'User is not a member of the group.']));
+                return $response->withStatus(403)->withHeader('Content-Type', 'application/json');
+            }
         }
 
         if ($this->MessageModel->sendMessage($groupId, $userId, $content)) {
@@ -51,9 +60,45 @@ class MessageController
 
     public function getMessages($request, $response, $args)
     {
+        $user = $request->getAttribute('user');
+        $username = $user['username'] ?? '';
+        $userId = $user['userId'] ?? '';
+
         $groupName = $args['groupName'] ?? ''; // since we are using a GET request with groupName as a parameter, for this
+
+        if (empty($groupName) || empty($username)) {
+            $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'GroupName and username are required.']));
+            return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+        }
+
         try {
-            $groupId = $this->getGroupId($groupName);
+            list($result, $groupId) = $this->groupContainsUser($groupName, $userId);
+        } catch (Exception $e) {
+            error_log(var_export($e->getMessage(), true));
+            $response->getBody()->write(json_encode(['flag' => 'error', 'message' => $e->getMessage()]));
+            return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
+        }
+
+        if (empty($result)) { // => no such groupMembers exist
+            if ($groupId == "Group not found.") {
+                $response->getBody()->write(json_encode(['flag' => 'error', 'message' => "Group not found."]));
+                return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
+            } else {
+                $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'User is not a member of the group.']));
+                return $response->withStatus(403)->withHeader('Content-Type', 'application/json');
+            }
+        }
+
+        try {
+            if (empty($groupId)) {
+                $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'Group not found.']));
+                return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
+            }
+        } catch (Exception $e) {
+            $response->getBody()->write(json_encode(['flag' => 'error', 'message' => $e->getMessage()]));
+            return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
+        }
+        try {
             if ($groupId) {
                 $messages = $this->MessageModel->getMessagesByGroup($groupId);
                 $response->getBody()->write(json_encode(['flag' => 'success', 'message' => $messages]));
@@ -72,7 +117,15 @@ class MessageController
 
     public function groupContainsUser($groupName, $userId)
     {
-        $groupId = $this->getGroupId($groupName);
+        try {
+            $groupId = $this->getGroupId($groupName);
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
+        }
+
+        if (empty($groupId)) {
+            return [false, "Group not found."];
+        }
 
         $stmt = $this->pdo->prepare('SELECT * FROM groupMembers WHERE groupId = :groupId AND userId = :userId');
         $stmt->bindParam(':groupId', $groupId);
@@ -86,10 +139,11 @@ class MessageController
     {
         try {
             $group = $this->GroupModel->getGroupByName($groupName);
-            return $group['id'];
+            if ($group) return $group['id'];
+            else return null;
         } catch (\Exception $e) {
             error_log("Could not find group: " . $e->getMessage());
-            throw new Exception("Group could not be found in the database.");
+            throw new Exception("Group not found.");
         }
     }
 }

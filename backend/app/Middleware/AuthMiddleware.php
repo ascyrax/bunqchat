@@ -15,7 +15,7 @@ class AuthMiddleware
 
         if (!$authHeader) {
             $response = new \Slim\Psr7\Response();
-            $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'Unauthorized. Missing Token. Login First.']));
+            $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'Unauthorized. Login required.']));
             return $response->withStatus(401)->withHeader('Content-Type', value: 'application/json');
         }
 

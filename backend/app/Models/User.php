@@ -50,6 +50,7 @@ class User
             return $result; // This will return null if no group is found
         } catch (PDOException $e) {
             error_log('failed to get user:' . $e->getMessage());
+            return null;
         }
     }
 
@@ -64,6 +65,7 @@ class User
             // return $result;
         } catch (PDOException $e) {
             error_log('failed to update user' . $e->getMessage());
+            return null;
         }
     }
 }

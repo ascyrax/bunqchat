@@ -11,15 +11,14 @@ class GroupMember
 
     public function joinGroup($userId, $groupId)
     {
-        error_log(var_export($userId, true).'-------'.var_export($groupId, true));
         try {
             $stmt = $this->pdo->prepare('INSERT INTO groupMembers (groupId, userId) VALUES (:groupId, :userId)');
             $stmt->bindParam(':groupId', $groupId);
             $stmt->bindParam(':userId', $userId);
-            return $stmt->execute();
+            return [true, $stmt->execute()];
         } catch (PDOException $e) {
             error_log('failed to add user to the group:' . $e->getMessage());
-            return false;
+            return [false, $e];
         }
     }
 

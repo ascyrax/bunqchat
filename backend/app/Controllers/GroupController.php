@@ -30,30 +30,45 @@ class GroupController
         // middleware handles all the cases where groupName does not exits
         // todo handle in middleware -> similar groupname already exists.
         // $groupName = $request->getAttribute('groupName');
-        error_log(var_export($groupName, true));
 
-        if ($this->GroupModel->createGroup($userId, $groupName)) {
+        if (empty($groupName)) {
+            $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'Group name is required.']));
+            return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+        }
+        list($flagCreate, $eCreate) = $this->GroupModel->createGroup($userId, $groupName);
+
+        if ($flagCreate) {
             $groupId = $this->getGroupId($groupName);
-
-            if ($this->GroupMemberModel->joinGroup($userId, $groupId)) {
+            list($flagJoin, $eJoin) = $this->GroupMemberModel->joinGroup($userId, $groupId);
+            if ($flagJoin) {
                 $response
                     ->getBody()
                     ->write(json_encode(['flag' => 'success', 'message' => 'group created + user joined the group successfully.']));
                 return $response->withStatus(201)
                     ->withHeader('Content-Type', 'application/json');
             } else {
-                $response
-                    ->getBody()
-                    ->write(json_encode(['flag' => 'error', 'message' => 'User failed to join the group.']));
-                return $response->withStatus(500)
-                    ->withHeader('Content-Type', 'application/json');
+                // Check if the error is due to a unique constraint violation
+                if ($eJoin && $eJoin->getCode() == '23000') {
+                    $response->getBody()
+                        ->write(json_encode(['flag' => 'error', 'message' => 'user has already joined the group.']));
+                    return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+                } else {
+                    $response->getBody()
+                        ->write(json_encode(['flag' => 'error', 'message' => 'User failed to join the group.']));
+                    return $response->withStatus(500)->withHeader('Content-Type', 'application/json');
+                }
             }
         } else {
-            $response
-                ->getBody()
-                ->write(json_encode(['flag' => 'error', 'message' => 'Failed to create chat group.']));
-            return $response->withStatus(500)
-                ->withHeader('Content-Type', 'application/json');
+            // Check if the error is due to a unique constraint violation
+            if ($eCreate && $eCreate->getCode() == '23000') {
+                $response->getBody()
+                    ->write(json_encode(['flag' => 'error', 'message' => 'group already exists.']));
+                return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+            } else {
+                $response->getBody()
+                    ->write(json_encode(['flag' => 'error', 'message' => 'failed to create the group.']));
+                return $response->withStatus(500)->withHeader('Content-Type', 'application/json');
+            }
         }
     }
 
@@ -71,7 +86,7 @@ class GroupController
             return $group['id'];
         } catch (\Exception $e) {
             error_log("Could not find group: " . $e->getMessage());
-            return throw new Exception("Group could not be found in the database.");
+            return throw new Exception("Group not found.");
         }
     }
 }
