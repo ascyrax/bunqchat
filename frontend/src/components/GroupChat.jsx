@@ -7,6 +7,7 @@ export default function GroupChat({ currentGroup, username, userId }) {
   const [error, setError] = useState("");
 
   const messagesEndRef = useRef(null);
+  const pollingInterval = 5000; // Polling interval in milliseconds (5 seconds)
 
   // Scroll to bottom whenever the messages array is updated
   useEffect(() => {
@@ -15,46 +16,47 @@ export default function GroupChat({ currentGroup, username, userId }) {
     }
   }, [messages]);
 
-  // Fetch messages for the current group
-  useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        const token = localStorage.getItem("token");
+  // Function to fetch messages for the current group
+  const fetchMessages = async () => {
+    try {
+      const token = localStorage.getItem("token");
 
-        if (!token) {
-          setError("You must be logged in to view messages.");
-          return;
-        }
-
-        const response = await fetch(
-          `http://localhost:8000/messages/${currentGroup}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        const data = await response.json();
-
-        console.log(data);
-
-        if (response.ok) {
-          setMessages(data.message);
-          // console.log(username);
-        } else {
-          setError(data.message || "Failed to load messages.");
-        }
-      } catch (err) {
-        setError("An unexpected error occurred. Please try again later.");
-        console.error("Fetch Messages Error:", err);
+      if (!token) {
+        setError("You must be logged in to view messages.");
+        return;
       }
-    };
 
+      const response = await fetch(
+        `http://localhost:8000/messages/${currentGroup}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessages(data.message); // Set messages from the API response
+      } else {
+        setError(data.message || "Failed to load messages.");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again later.");
+      console.error("Fetch Messages Error:", err);
+    }
+  };
+
+  // Initial fetch and polling for new messages
+  useEffect(() => {
     if (currentGroup) {
-      fetchMessages(); // Fetch messages when the currentGroup changes
+      fetchMessages(); // Initial fetch
+      const intervalId = setInterval(fetchMessages, pollingInterval); // Start polling
+
+      return () => clearInterval(intervalId); // Cleanup interval on component unmount
     }
   }, [currentGroup]);
 
@@ -63,9 +65,9 @@ export default function GroupChat({ currentGroup, username, userId }) {
   };
 
   const handleSubmit = async (e) => {
-    console.log(messages);
     e.preventDefault();
     if (value.trim() === "") return;
+
     const newMessage = {
       groupName: currentGroup,
       message: value,
@@ -73,7 +75,6 @@ export default function GroupChat({ currentGroup, username, userId }) {
       createdBy: username,
     };
 
-    console.log(newMessage);
     // Optimistically update the UI
     setMessages((prevMessages) => [...prevMessages, newMessage]);
     setValue("");
@@ -98,7 +99,6 @@ export default function GroupChat({ currentGroup, username, userId }) {
 
       if (!response.ok) {
         const data = await response.json();
-        console.log(data);
         setError(data.message || "Failed to send the message.");
       }
     } catch (err) {
