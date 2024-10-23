@@ -12,12 +12,7 @@ function App() {
   const [loginStatus, setLoginStatus] = useState(false);
   const [username, setUsername] = useState("");
   const [userId, setUserId] = useState("");
-  const [groupStatus, setGroupStatus] = useState(0);
-  const [userStatus, setUserStatus] = useState(0);
-  // 0 = neutral, 1 = create, 2 = join
   const [currentGroup, setCurrentGroup] = useState("");
-  // const [currentUser, setCurrentUser] = useState("suraj");
-  //  todo. hardcoded value here
 
   const handleGroupCreate = () => {
     setGroupStatus(1);
