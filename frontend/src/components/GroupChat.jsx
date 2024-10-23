@@ -8,6 +8,7 @@ export default function GroupChat({ currentGroup, username, userId }) {
 
   const messagesEndRef = useRef(null);
   const pollingInterval = 5000; // Polling interval in milliseconds (5 seconds)
+  const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
   // Scroll to bottom whenever the messages array is updated
   useEffect(() => {
@@ -27,7 +28,7 @@ export default function GroupChat({ currentGroup, username, userId }) {
       }
 
       const response = await fetch(
-        `http://localhost:8000/messages/${currentGroup}`,
+        `${SERVER_URL}/messages/${currentGroup}`,
         {
           method: "GET",
           headers: {
@@ -88,7 +89,7 @@ export default function GroupChat({ currentGroup, username, userId }) {
       }
 
       // Send the new message to the backend
-      const response = await fetch(`http://localhost:8000/messages`, {
+      const response = await fetch(`${SERVER_URL}/messages`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

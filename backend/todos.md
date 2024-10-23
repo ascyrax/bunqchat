@@ -6,8 +6,5 @@ OR, in the same lists of groups, i can just add a tag saying ('member' or 'creat
 
 each user's name in the group chat should have a unique color :)
 
-
-
-1. process.env. not working => process not defined
 2. fix joinGroup debounced search
 3. createdAt + createdBy added => update tests + uncomment empty checker for this in messagecontroller

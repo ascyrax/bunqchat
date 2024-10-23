@@ -19,6 +19,8 @@ const Login = ({ setLoginStatus, setUsername, setUserId }) => {
   // state for error in api calls
   const [apiError, setApiError] = useState("");
 
+  const SERVER_URL = import.meta.env.VITE_SERVER_URL;
+
   // Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -42,7 +44,7 @@ const Login = ({ setLoginStatus, setUsername, setUserId }) => {
       // Perform login logic (e.g., API call)
       try {
         // Perform API call for login
-        const response = await fetch("http://localhost:8000/login", {
+        const response = await fetch(`${SERVER_URL}/login`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

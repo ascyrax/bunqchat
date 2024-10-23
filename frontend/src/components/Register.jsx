@@ -23,6 +23,8 @@ const Register = () => {
   // state for error in api calls
   const [apiError, setApiError] = useState("");
 
+  const SERVER_URL = import.meta.env.VITE_SERVER_URL;
+
   // Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -50,7 +52,7 @@ const Register = () => {
       // Perform registration logic (e.g., API call)
       try {
         // Perform API call for registration
-        const response = await fetch(`http://localhost:8000/register`, {
+        const response = await fetch(`${SERVER_URL}/register`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

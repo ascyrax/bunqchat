@@ -13,6 +13,8 @@ export default function CreateGroup({ setCurrentGroup }) {
   // State for error message
   const [error, setError] = useState("");
 
+  const SERVER_URL = import.meta.env.VITE_SERVER_URL;
+
   // useEffect(() => {
   //   let timeoutId = setTimeout(handleDebouncedInput, 1000);
 
@@ -45,7 +47,7 @@ export default function CreateGroup({ setCurrentGroup }) {
     // send server query to create a new grp
     try {
       // Perform API call to create a group
-      const response = await fetch("http://localhost:8000/groups", {
+      const response = await fetch(`${SERVER_URL}/groups`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
