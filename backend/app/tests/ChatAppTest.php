@@ -329,7 +329,12 @@ class ChatAppTest extends TestCase
         $request = (new ServerRequestFactory())
             ->createServerRequest('POST', '/messages')
             ->withHeader('Authorization', 'Bearer ' . $this->userToken)
-            ->withParsedBody(['message' => 'Hello, World!', 'groupName' => 'Test Group']);
+            ->withParsedBody([
+                'message' => 'Hello, World!',
+                'groupName' => 'Test Group',
+                'createdBy' => 'testuser',
+                'createdAt' => date('H:i:s')
+            ]);
 
         $response = $this->runApp($request);
 
@@ -355,7 +360,7 @@ class ChatAppTest extends TestCase
 
         $body = json_decode((string)$response->getBody(), true);
         $this->assertEquals('error', $body['flag']);
-        $this->assertEquals('GroupName, username and message are required.', $body['message']);
+        $this->assertEquals('GroupName, username, message and creation data are all required.', $body['message']);
     }
 
     public function testSendMessageToNonExistentGroup()
@@ -365,7 +370,12 @@ class ChatAppTest extends TestCase
         $request = (new ServerRequestFactory())
             ->createServerRequest('POST', '/messages')
             ->withHeader('Authorization', 'Bearer ' . $this->userToken)
-            ->withParsedBody(['message' => 'Hello, World!', 'groupName' => '999 Group']);
+            ->withParsedBody([
+                'message' => 'Hello, World!',
+                'groupName' => '999 Group',
+                'createdBy' => 'testuser',
+                'createdAt' => date('H:i:s')
+            ]);
 
 
         $response = $this->runApp($request);
@@ -411,7 +421,12 @@ class ChatAppTest extends TestCase
         $request = (new ServerRequestFactory())
             ->createServerRequest('POST', '/messages')
             ->withHeader('Authorization', 'Bearer ' . $this->userToken)
-            ->withParsedBody(['message' => 'Hello', 'groupName' => 'Another Group']);
+            ->withParsedBody([
+                'message' => 'Hello',
+                'groupName' => 'Another Group',
+                'createdBy' => 'testuser',
+                'createdAt' => date('H:i:s')
+            ]);
 
         $response = $this->runApp($request);
 
@@ -489,7 +504,7 @@ class ChatAppTest extends TestCase
         $stmt->execute([':userId' => $this->userId, ':groupId' => $groupId]);
 
         $request = (new ServerRequestFactory())
-            ->createServerRequest('GET', '/messages'.'/Not Joined Group')
+            ->createServerRequest('GET', '/messages' . '/Not Joined Group')
             ->withHeader('Authorization', 'Bearer ' . $this->userToken);
 
         $response = $this->runApp($request);

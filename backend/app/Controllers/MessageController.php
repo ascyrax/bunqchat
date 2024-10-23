@@ -27,9 +27,9 @@ class MessageController
         $createdAt = $params['createdAt'] ?? date('H:i:s'); // Use provided timestamp or current time
         $createdBy = $params['createdBy'] ?? ''; // Use provided timestamp or current time
 
-        if (empty($groupName) || empty($username) || empty($message)) {
-            // if (empty($groupName) || empty($username) || empty($message) || empty($createdAt) || empty($createdBy)) {
-            $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'GroupName, username and message are required.']));
+        // if (empty($groupName) || empty($username) || empty($message)) {
+        if (empty($groupName) || empty($username) || empty($message) || empty($createdAt) || empty($createdBy)) {
+            $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'GroupName, username, message and creation data are all required.']));
             return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
         }
 
