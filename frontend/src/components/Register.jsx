@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import "../styles/Register.css";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 const Register = () => {
+  const navigate = useNavigate();
+
   // State for form fields
   const [formData, setFormData] = useState({
     username: "",
@@ -65,9 +67,11 @@ const Register = () => {
 
         // Handle response based on status
         if (response.ok) {
+          // Simulating a successful registration
           setSuccess("Registration successful!");
           setFormData({ username: "", password: "", confirmPassword: "" });
           setErrors({});
+          navigate("/login");
         } else {
           // Handle errors from the server
           setApiError(data.message || "Failed to register. Please try again.");
@@ -77,10 +81,6 @@ const Register = () => {
         setApiError("An unexpected error occurred. Please try again later.");
         console.error("Registration Error:", error);
       }
-      // Simulating a successful registration
-      setSuccess("Registration successful!");
-      setFormData({ username: "", password: "", confirmPassword: "" });
-      setErrors({});
     }
   };
 

@@ -58,7 +58,8 @@ function createTables($pdo)
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         groupId INTEGER NOT NULL,
         userId INTEGER NOT NULL, -- this is the id of the user who sent the messages
-        content TEXT NOT NULL,
+        message TEXT NOT NULL,
+        createdBy TEXT NOT NULL, -- username corresponding to the userId
         createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (groupId) REFERENCES groups(id) ON DELETE CASCADE,
         FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE

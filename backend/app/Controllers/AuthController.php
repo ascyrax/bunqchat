@@ -96,7 +96,13 @@ class AuthController
 
             $response
                 ->getBody()
-                ->write(json_encode(['flag' => 'success', 'message' => 'Login successful.', 'token' => $jwt, 'username' => $user['username']]));
+                ->write(json_encode([
+                    'flag' => 'success',
+                    'message' => 'Login successful.',
+                    'token' => $jwt,
+                    'username' => $user['username'],
+                    'userId' => $user['id']
+                ]));
             return $response
                 ->withStatus(200)
                 ->withHeader('Content-Type', 'application/json');

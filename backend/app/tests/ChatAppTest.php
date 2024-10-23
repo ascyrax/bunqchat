@@ -439,7 +439,7 @@ class ChatAppTest extends TestCase
         $body = json_decode((string)$response->getBody(), true);
         $this->assertEquals('success', $body['flag']);
         $this->assertIsArray($body['message']);
-        $this->assertEquals('Hello, World!', $body['message'][0]['content']);
+        $this->assertEquals('Hello, World!', $body['message'][0]['message']);
     }
 
     public function testListMessagesFromNonExistentGroup()

@@ -5,6 +5,10 @@
   width: 100vw;
 }
 
+.landing .header{
+  margin-top: 5rem;
+}
+
 /* header */
 
 .landing .header {

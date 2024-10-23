@@ -11,11 +11,12 @@ import Login from "./components/Login";
 function App() {
   const [loginStatus, setLoginStatus] = useState(false);
   const [username, setUsername] = useState("");
+  const [userId, setUserId] = useState("");
   const [groupStatus, setGroupStatus] = useState(0);
   const [userStatus, setUserStatus] = useState(0);
   // 0 = neutral, 1 = create, 2 = join
   const [currentGroup, setCurrentGroup] = useState("");
-  const [currentUser, setCurrentUser] = useState("suraj");
+  // const [currentUser, setCurrentUser] = useState("suraj");
   //  todo. hardcoded value here
 
   const handleGroupCreate = () => {
@@ -55,7 +56,11 @@ function App() {
       <Route
         path="/login"
         element={
-          <Login setLoginStatus={setLoginStatus} setUsername={setUsername} />
+          <Login
+            setLoginStatus={setLoginStatus}
+            setUsername={setUsername}
+            setUserId={setUserId}
+          />
         }
       />
       <Route
@@ -69,7 +74,11 @@ function App() {
       <Route
         path="groups/*"
         element={
-          <GroupChat currentGroup={currentGroup} currentUser={currentUser} />
+          <GroupChat
+            currentGroup={currentGroup}
+            username={username}
+            userId={userId}
+          />
         }
       />
     </Routes>

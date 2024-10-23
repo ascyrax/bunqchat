@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "../styles/Login.css";
 import { NavLink, useNavigate } from "react-router-dom";
 
-const Login = ({ setLoginStatus, setUsername }) => {
+const Login = ({ setLoginStatus, setUsername, setUserId }) => {
   const navigate = useNavigate();
   // State for form fields
   const [formData, setFormData] = useState({
@@ -66,8 +66,9 @@ const Login = ({ setLoginStatus, setUsername }) => {
           // You can handle the token and redirect logic here
           localStorage.setItem("token", data.token);
           setLoginStatus(true);
-          navigate("/"); // Redirect to homepage
           setUsername(data.username);
+          setUserId(data.userId);
+          navigate("/"); // Redirect to homepage
         } else {
           // Handle errors from the server
           setApiError(data.message || "Failed to login. Please try again.");

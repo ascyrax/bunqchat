@@ -1,5 +1,6 @@
 <?php
 
+use SebastianBergmann\Environment\Console;
 
 class Message
 {
@@ -10,13 +11,15 @@ class Message
         $this->pdo = $pdo;
     }
 
-    public function sendMessage($groupId, $userId, $content)
+    public function sendMessage($groupId, $userId, $message, $createdAt, $createdBy)
     {
         try {
-            $stmt = $this->pdo->prepare('INSERT INTO messages (groupId, userId, content) VALUES (:groupId, :userId, :content)');
+            $stmt = $this->pdo->prepare('INSERT INTO messages (groupId, userId, message, createdAt, createdBy) VALUES (:groupId, :userId, :message, :createdAt, :createdBy)');
             $stmt->bindParam(':groupId', $groupId);
             $stmt->bindParam(':userId', $userId);
-            $stmt->bindParam(':content', $content);
+            $stmt->bindParam(':message', $message);
+            $stmt->bindParam(':createdAt', $createdAt);
+            $stmt->bindParam(':createdBy', $createdBy);
             return $stmt->execute();
         } catch (PDOException $e) {
             error_log('failed to create a new message:' . $e->getMessage());

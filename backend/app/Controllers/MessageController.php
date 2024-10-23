@@ -23,10 +23,12 @@ class MessageController
 
         $params = (array)$request->getParsedBody();
         $groupName = $params['groupName'] ?? '';
+        $message = $params['message'] ?? '';
+        $createdAt = $params['createdAt'] ?? date('H:i:s'); // Use provided timestamp or current time
+        $createdBy = $params['createdBy'] ?? ''; // Use provided timestamp or current time
 
-        $content = $params['message'] ?? '';
-
-        if (empty($groupName) || empty($username) || empty($content)) {
+        if (empty($groupName) || empty($username) || empty($message)) {
+            // if (empty($groupName) || empty($username) || empty($message) || empty($createdAt) || empty($createdBy)) {
             $response->getBody()->write(json_encode(['flag' => 'error', 'message' => 'GroupName, username and message are required.']));
             return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
         }
@@ -49,7 +51,7 @@ class MessageController
             }
         }
 
-        if ($this->MessageModel->sendMessage($groupId, $userId, $content)) {
+        if ($this->MessageModel->sendMessage($groupId, $userId, $message, $createdAt, $createdBy)) {
             $response->getBody()->write(json_encode(['flag' => 'success', 'message' => 'Message sent successfully.']));
             return $response->withStatus(201)->withHeader('Content-Type', 'application/json');
         } else {
