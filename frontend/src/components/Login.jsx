@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "../styles/Login.css";
 import { NavLink, useNavigate } from "react-router-dom";
 
-const Login = ({ setLoginStatus }) => {
+const Login = ({ setLoginStatus, setUsername }) => {
   const navigate = useNavigate();
   // State for form fields
   const [formData, setFormData] = useState({
@@ -67,6 +67,7 @@ const Login = ({ setLoginStatus }) => {
           localStorage.setItem("token", data.token);
           setLoginStatus(true);
           navigate("/"); // Redirect to homepage
+          setUsername(data.username);
         } else {
           // Handle errors from the server
           setApiError(data.message || "Failed to login. Please try again.");

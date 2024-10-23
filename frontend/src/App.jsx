@@ -10,6 +10,7 @@ import Login from "./components/Login";
 
 function App() {
   const [loginStatus, setLoginStatus] = useState(false);
+  const [username, setUsername] = useState("");
   const [groupStatus, setGroupStatus] = useState(0);
   const [userStatus, setUserStatus] = useState(0);
   // 0 = neutral, 1 = create, 2 = join
@@ -40,6 +41,7 @@ function App() {
             <GroupLanding
               handleGroupCreate={handleGroupCreate}
               handleGroupJoin={handleGroupJoin}
+              username={username}
             />
           ) : (
             <UserLanding
@@ -52,14 +54,16 @@ function App() {
       <Route path="/register" element={<Register />} />
       <Route
         path="/login"
-        element={<Login setLoginStatus={setLoginStatus} />}
+        element={
+          <Login setLoginStatus={setLoginStatus} setUsername={setUsername} />
+        }
       />
       <Route
-        path="gcreate"
+        path="/groups"
         element={<CreateGroup setCurrentGroup={setCurrentGroup} />}
       />
       <Route
-        path="gjoin"
+        path="/join"
         element={<JoinGroup setCurrentGroup={setCurrentGroup} />}
       />
       <Route

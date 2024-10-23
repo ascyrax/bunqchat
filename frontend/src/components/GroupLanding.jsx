@@ -3,7 +3,11 @@ import reactLogo from "/bunq.svg";
 import "../styles/Landing.css";
 import { NavLink } from "react-router-dom";
 
-export default function GroupLanding({ handleGroupCreate, handleGroupJoin }) {
+export default function GroupLanding({
+  handleGroupCreate,
+  handleGroupJoin,
+  username,
+}) {
   return (
     <div className="landing GroupLanding">
       <div className="header">
@@ -11,12 +15,15 @@ export default function GroupLanding({ handleGroupCreate, handleGroupJoin }) {
           <img src={reactLogo} className="logo spin" alt="React logo" />
         </a>
         <h1>bunqchat</h1>
+        <h2>
+          {`Welcome`} <span style={{ color: "cyan" }}>{username}</span>
+        </h2>
       </div>
       <div className="card">
-        <NavLink to="/gcreate">
+        <NavLink to="/groups">
           <button onClick={handleGroupCreate}>Create a Group</button>
         </NavLink>
-        <NavLink to="gjoin">
+        <NavLink to="/join">
           <button onClick={handleGroupJoin}>Join a Group</button>
         </NavLink>
       </div>
