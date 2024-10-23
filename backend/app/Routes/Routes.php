@@ -59,6 +59,10 @@ function chatRoutes($app, $pdo)
 
     $app->addBodyParsingMiddleware();
 
+    // Note: Make sure to add the CORS middleware before the exception handling middleware and after body parsing middleware.
+    $app->add(new \App\Middleware\CorsMiddleware());
+
+
     // $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
     // // Optional: Customize the error handler
