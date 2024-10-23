@@ -132,7 +132,8 @@ export default function JoinGroup({ setCurrentGroup }) {
       <div className="search">
         <input
           type="search"
-          placeholder="Search a group"
+          // placeholder="Search a group"
+          placeholder="TODO: WORK IN PROGRESS"
           value={value}
           onChange={handleInput}
         />

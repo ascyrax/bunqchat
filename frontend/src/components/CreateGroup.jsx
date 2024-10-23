@@ -30,6 +30,7 @@ export default function CreateGroup({ setCurrentGroup }) {
   // };
 
   const handleInput = (e) => {
+    setError("");
     setGroupName(e.target.value);
   };
 
