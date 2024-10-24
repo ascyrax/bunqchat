@@ -76,6 +76,8 @@ export default function GroupChat({ currentGroup, username, userId }) {
       createdBy: username,
     };
 
+    console.log(newMessage);
+
     // Optimistically update the UI
     setMessages((prevMessages) => [...prevMessages, newMessage]);
     setValue("");

@@ -14,37 +14,12 @@ function App() {
   const [userId, setUserId] = useState("");
   const [currentGroup, setCurrentGroup] = useState("");
 
-  const handleGroupCreate = () => {
-    setGroupStatus(1);
-  };
-  const handleGroupJoin = () => {
-    setGroupStatus(2);
-  };
-
-  const handleUserCreate = () => {
-    setUserStatus(1);
-  };
-  const handleUserJoin = () => {
-    setUserStatus(2);
-  };
-
   return (
     <Routes>
       <Route
         path="/"
         element={
-          loginStatus ? (
-            <GroupLanding
-              handleGroupCreate={handleGroupCreate}
-              handleGroupJoin={handleGroupJoin}
-              username={username}
-            />
-          ) : (
-            <UserLanding
-              handleUserCreate={handleUserCreate}
-              handleUserJoin={handleUserJoin}
-            />
-          )
+          loginStatus ? <GroupLanding username={username} /> : <UserLanding />
         }
       />
       <Route path="/register" element={<Register />} />

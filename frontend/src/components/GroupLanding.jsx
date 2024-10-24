@@ -21,10 +21,10 @@ export default function GroupLanding({
       </div>
       <div className="card">
         <NavLink to="/groups">
-          <button onClick={handleGroupCreate}>Create a Group</button>
+          <button>Create a Group</button>
         </NavLink>
         <NavLink to="/join">
-          <button onClick={handleGroupJoin}>Join a Group</button>
+          <button>Join a Group</button>
         </NavLink>
       </div>
     </div>
