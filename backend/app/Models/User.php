@@ -17,7 +17,7 @@ class User
             $stmt->bindParam(':password', $password);
             return [true, $stmt->execute()];
         } catch (PDOException $e) {
-            error_log("failed to create a new user:" . $e->getMessage());
+            error_log("\n" . "failed to create a new user:" . $e->getMessage());
             return [false, $e];
         }
     }
@@ -33,7 +33,7 @@ class User
 
             return $result; // This will return null if no group is found
         } catch (PDOException $e) {
-            error_log('failed to get user:' . $e->getMessage());
+            error_log("\n" . 'failed to get user:' . $e->getMessage());
             return [];
         }
     }
@@ -49,7 +49,7 @@ class User
 
             return $result; // This will return null if no group is found
         } catch (PDOException $e) {
-            error_log('failed to get user:' . $e->getMessage());
+            error_log("\n" . 'failed to get user:' . $e->getMessage());
             return null;
         }
     }
@@ -64,7 +64,7 @@ class User
             // $result = $stmt->fetch(PDO::FETCH_ASSOC);
             // return $result;
         } catch (PDOException $e) {
-            error_log('failed to update user' . $e->getMessage());
+            error_log("\n" . 'failed to update user' . $e->getMessage());
             return null;
         }
     }

@@ -22,7 +22,7 @@ class Message
             $stmt->bindParam(':createdBy', $createdBy);
             return $stmt->execute();
         } catch (PDOException $e) {
-            error_log('failed to create a new message:' . $e->getMessage());
+            error_log("\n" . 'failed to create a new message:' . $e->getMessage());
             return false;
         }
     }
@@ -35,7 +35,7 @@ class Message
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log('failed to get messages of the group:' . $e->getMessage());
+            error_log("\n" . 'failed to get messages of the group:' . $e->getMessage());
             return [];
         }
     }

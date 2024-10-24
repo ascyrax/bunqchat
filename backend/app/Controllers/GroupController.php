@@ -85,7 +85,7 @@ class GroupController
             $group = $this->GroupModel->getGroupByName($groupName);
             return $group['id'];
         } catch (\Exception $e) {
-            error_log("Could not find group: " . $e->getMessage());
+            error_log("\n" . "Could not find group: " . $e->getMessage());
             return throw new Exception("Group not found.");
         }
     }

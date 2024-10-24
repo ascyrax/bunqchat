@@ -36,7 +36,7 @@ class MessageController
         try {
             list($result, $groupId) = $this->groupContainsUser($groupName, $userId);
         } catch (Exception $e) {
-            error_log(var_export($e->getMessage(), true));
+            error_log(var_export("\n" . $e->getMessage(), true));
             $response->getBody()->write(json_encode(['flag' => 'error', 'message' => $e->getMessage()]));
             return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
         }
@@ -76,7 +76,7 @@ class MessageController
         try {
             list($result, $groupId) = $this->groupContainsUser($groupName, $userId);
         } catch (Exception $e) {
-            error_log(var_export($e->getMessage(), true));
+            error_log(var_export("\n" . $e->getMessage(), true));
             $response->getBody()->write(json_encode(['flag' => 'error', 'message' => $e->getMessage()]));
             return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
         }

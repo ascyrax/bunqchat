@@ -21,7 +21,7 @@ function createDatabase($dsn = null)
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $pdo->exec('PRAGMA foreign_keys = ON;');  // Enable foreign keys
     } catch (PDOException $e) {
-        error_log("Database connection error: " . $e->getMessage());
+        error_log("\n" . "Database connection error: " . $e->getMessage());
         throw new Exception("Unable to connect to the database.");
     }
 

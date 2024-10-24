@@ -18,7 +18,7 @@ class Group
             $stmt->bindParam(':createdBy', $userId);
             return [true, $stmt->execute()];
         } catch (PDOException $e) {
-            error_log("failed to create a new group:" . $e->getMessage());
+            error_log("\n" . "failed to create a new group:" . $e->getMessage());
             return [false, $e];
         }
     }
@@ -29,7 +29,7 @@ class Group
             $stmt = $this->pdo->query('SELECT * FROM groups');
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log("failed to get all groups:" . $e->getMessage());
+            error_log("\n" . "failed to get all groups:" . $e->getMessage());
             return [];
         }
     }
@@ -44,7 +44,7 @@ class Group
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             return $result; // This will return false if no group is found
         } catch (PDOException $e) {
-            error_log("failed to get the group:" . $e->getMessage());
+            error_log("\n" . "failed to get the group:" . $e->getMessage());
             return [];
         }
     }

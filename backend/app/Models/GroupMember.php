@@ -17,7 +17,7 @@ class GroupMember
             $stmt->bindParam(':userId', $userId);
             return [true, $stmt->execute()];
         } catch (PDOException $e) {
-            error_log('failed to add user to the group:' . $e->getMessage());
+            error_log("\n" . 'failed to add user to the group:' . $e->getMessage());
             return [false, $e];
         }
     }
@@ -28,7 +28,7 @@ class GroupMember
             $stmt = $this->pdo->query('SELECT * FROM groupMembers');
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log('failed to get users of this group:' . $e->getMessage());
+            error_log("\n" . 'failed to get users of this group:' . $e->getMessage());
             return [];
         }
     }
@@ -45,7 +45,7 @@ class GroupMember
 
             return $result; // This will return null if no group is found
         } catch (PDOException $e) {
-            error_log('failed to get group member' . $e->getMessage());
+            error_log("\n" . 'failed to get group member' . $e->getMessage());
             return [];
         }
     }

@@ -26,13 +26,13 @@ class JsonBodyParserMiddleware implements MiddlewareInterface
         $errorResponse = [];
 
         if ($parsedBody === null) {
-            error_log('Parsed body is null. Raw body contents: ' . $rawBody);
+            error_log("\n" . 'Parsed body is null. Raw body contents: ' . $rawBody);
             $errorResponse = [
                 'flag' => 'error',
                 'message' => 'Empty request.'
             ];
         } else {
-            error_log('Parsed body: ' . var_export($parsedBody, true));
+            error_log("\n" . 'Parsed body: ' . var_export($parsedBody, true));
         }
 
         $groupName = $parsedBody[$this->propName] ?? null;
