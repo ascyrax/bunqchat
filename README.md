@@ -310,7 +310,7 @@ This project is licensed under the MIT License.
 
 ## Contact
 
-For any questions or issues, please contact [your_email@example.com](mailto:your_email@example.com).
+For any questions or issues, please contact [ascyrax00@gmail.com](mailto:ascyrax00@gmail.com).
 
 ---
 
